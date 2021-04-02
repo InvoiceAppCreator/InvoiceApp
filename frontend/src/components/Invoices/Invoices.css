@@ -1,0 +1,198 @@
+.invoices-nav {
+    position: relative;
+    width: 98%;
+    background-color: #30a309;
+    padding: 1%;
+    color: white;
+}
+
+#nav-header {
+    text-align: left;
+    font-family: "Lucida Console", "Courier New", monospace;
+}
+
+.invoices-user {
+  margin-top: 1%;
+  margin-left: 1%;
+  height: 250px;
+  float: left;
+  background-color: #30a309;
+  width: 24%;
+  text-align: center;
+  border: 2px solid;
+}
+
+.invoices-user img {
+  margin-top: 5px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+}
+
+.invoices-user p {
+  margin-top: 5px;
+  font-family: cursive;
+  color: white;
+  font-size: 1.3em;
+}
+
+#user-line {
+  height: 2px;
+  background-color: black;
+  border: none;
+}
+
+.invoices-buttons {
+  float:left;
+  background-color: black;
+  width: 72.6%;
+  margin-left: 1%;
+  margin-top: 1%;
+  height: 250px;
+  border: 2px solid;
+}
+
+#buttons-background-image {
+  height: 180px;
+  width: 100%;
+}
+
+#buttons-background-image img {
+  width: 100%;
+  height: 180px;
+}
+
+#buttons-function-buttons {
+  height: 70px;
+  width: 100%;
+
+}
+
+#buttons-function-buttons button{
+  width: 33.33%;
+  height: 70px;
+  font-size: 1em;
+  background-color: #30a309;
+  border: none;
+  font-family: "Lucida Console", "Courier New", monospace;
+  color: white;
+  font-weight: bold;
+
+}
+
+#buttons-function-buttons button:hover {
+  background-color: #08491f;
+}
+
+#button-functions-buttons-create {
+  border-left: none;
+}
+
+#button-functions-buttons-import {
+  border-right: none;
+}
+
+.invoices-invoicesTable {
+  border: 2px solid;
+  float: left;
+  background-color: #30a309;
+  width: 98%;
+  margin-top: 1%;
+  margin-left: 1%;
+  height: 330px;
+}
+
+#invoicesTable-table {
+  float: left;
+  width: 90%;
+  height: 100%;
+  background-color: white;
+  table-layout: fixed;
+}
+
+#invoicesTable-table-headers {
+  width: 100%;
+  height: 3em;
+  background-color: #30a309;
+}
+
+#invoicesTable-table-headers table {
+  text-align: left;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#invoicesTable-table-headers th {
+  color:white;
+  padding: 10px;
+}
+
+#invoiceNumber {
+  width: 120px;
+}
+
+#invoice-customer {
+  width: 300px;
+}
+
+#invoice-created, #invoice-due-date, #invoice-total-due, #invoice-status {
+  width: 100px;
+}
+
+
+
+#invoicesTable-table-table {
+  width: 100%;
+  height: 282px;
+  background-color: white;
+  overflow: scroll;
+}
+
+#invoicesTable-table-table table {
+  background-color: white;
+  text-align: left;
+  width: 100%;
+  overflow: hidden;
+  border-collapse: collapse;
+}
+
+#invoicesTable-table-table td {
+  color:black;
+  border-bottom: 1px solid black;
+  padding: 10px;
+}
+
+#invoicesTable-table-table tr:nth-child(even){background-color: #f2f2f2;}
+
+#invoicesTable-table-table tr:hover {
+  background-color: #ddd;
+}
+
+
+
+
+
+
+#invoicesTable-buttons {
+  float: left;
+  width: 10%;
+  height: 100%;
+  background-color: black;
+}
+
+#invoicesTable-buttons button {
+  background-color: #30a309;
+  color: white;
+  width: 100%;
+  height: 33.3%;
+  padding: 15px 32px;
+  text-align: center;
+  font-size: 16px;
+  border:none;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+}
+
+#invoicesTable-buttons button:hover {
+  background-color: #08491f
+}

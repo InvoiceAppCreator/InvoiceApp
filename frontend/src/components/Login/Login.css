@@ -1,0 +1,70 @@
+.login-nav {
+    position: relative;
+    width: 98%;
+    background-color: #30a309;
+    padding: 1%;
+    color: white;
+}
+
+#login-nav-header {
+    text-align: left;
+    font-family: "Lucida Console", "Courier New", monospace;
+}
+
+.login-main-body {
+  width: 500px;
+  height: 300px;
+  background-color: #30a309;
+  margin: 9% auto;
+  padding: 20px;
+  border-radius: 5px 5px 5px 5px;
+}
+
+.login-main-body label{
+  float: left;
+  text-align: left;
+  color: white;
+  font-size: 30px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.login-main-body input {
+  padding: 2%;
+  width: 93%;
+  font-size: 20px;
+  border-radius: 10px 10px 10px 10px;
+}
+
+.login-main-body button {
+  float: left;
+  width: 98%;
+  padding: 15px;
+  background-color: black;
+  color: white;
+  margin-top: 20px;
+  border-radius: 10px 10px 10px 10px;
+  font-size: 30px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.login-main-body button:hover {
+  background-color: lightgrey;
+  color: black;
+}
+
+#login-password {
+  margin-top: 20px;
+}
+
+a {
+  float: left;
+  text-decoration: none;
+  color: white;
+  font-size: 20px;
+  margin-top: -19px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a:hover {
+  color: red;
+}
