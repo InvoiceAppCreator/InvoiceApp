@@ -4,7 +4,9 @@ from . import views
 
 urlpatterns = [
     path('users/', views.Users.as_view()),
-    path('invoiceList/', views.InvoiceLists.as_view()),
+    path('invoiceList/<username>', views.InvoiceLists),
+    path('part-invoice/<username>', views.invoiceParts),
     path('quoteList/<username>', views.QuoteLists),
-    path('parts/', views.Parts)
+    path('parts/<username>', views.Parts),
+    path('part-search/<username>', views.partSearch)
 ]

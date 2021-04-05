@@ -3,7 +3,7 @@ import './Quotes.css'
 
 function TableTemplate(props) {
   return (
-    <tr>
+    <tr onClick={props.myFunction.bind(this, props.id)}>
       <td id='quoteNumber'>{props.quoteNumber}</td>
       <td id='createDate'>{props.createdDate}</td>
       <td id='expectDate'>{props.expectedDate}</td>

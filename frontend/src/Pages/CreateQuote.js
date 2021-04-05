@@ -12,13 +12,12 @@ class CreateQuote extends Component {
       quoteNumber: '',
       customers: '',
       total: '',
-      createdDate: '',
+      createdDate: `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
       salesperson: '',
       expectedDate: '',
       company: '',
       status: false,
 
-      groupNumber: [],
       modelNumber: [],
       partNumber: [],
       description: [],
@@ -44,15 +43,13 @@ class CreateQuote extends Component {
 
   saveQuote = () => {
     for (var i = 0; i < this.state.partID; i++) {
-      if (document.getElementById(`groupNumber${i}`) !== null &&
-      document.getElementById(`modelNumber${i}`) !== null &&
+      if (document.getElementById(`modelNumber${i}`) !== null &&
       document.getElementById(`partNumber${i}`) !== null &&
       document.getElementById(`description${i}`) !== null &&
       document.getElementById(`cost${i}`) !== null &&
       document.getElementById(`price${i}`) !== null &&
       document.getElementById(`qtyOnHand${i}`) !== null &&
       document.getElementById(`qtyComitted${i}`) !== null) {
-        this.state.groupNumber.push(document.getElementById(`groupNumber${i}`).innerHTML)
         this.state.modelNumber.push(document.getElementById(`modelNumber${i}`).innerHTML)
         this.state.partNumber.push(document.getElementById(`partNumber${i}`).innerHTML)
         this.state.description.push(document.getElementById(`description${i}`).innerHTML)
@@ -63,8 +60,7 @@ class CreateQuote extends Component {
 
         var info = {
           'partQuoteNumber' : this.state.quoteNumber,
-          'author': document.cookie.split('=')[1],
-          'partGroupCode' : this.state.groupNumber[i],
+          'author': document.cookie.split(';')[0].split('=')[1],
           'partModelNumber' : this.state.modelNumber[i],
           'partNumber' : this.state.partNumber[i],
           'partDescription' : this.state.description[i],
@@ -73,13 +69,13 @@ class CreateQuote extends Component {
           'partQtyOnHand' : this.state.qtyOnHand[i],
           'partQtyCommitted' : this.state.qtyComitted[i]
         }
-        axios.post('http://localhost:8000/api/parts/', info).then(res => {
+        axios.post(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`, info).then(res => {
           console.log(res)
         })
       }
     }
     var quoteData = {
-      'author': document.cookie.split('=')[1],
+      'author': document.cookie.split(';')[0].split('=')[1],
       'quoteNumber': this.state.quoteNumber,
       'customers': this.state.customers,
       'total': this.state.total,
@@ -89,7 +85,7 @@ class CreateQuote extends Component {
       'company': this.state.company,
       'status': this.state.status
     }
-    axios.post(`http://localhost:8000/api/quoteList/${document.cookie.split('=')[1]}`, quoteData).then(res => {
+    axios.post(`http://localhost:8000/api/quoteList/${document.cookie.split(';')[0].split('=')[1]}`, quoteData).then(res => {
       console.log(res)
       window.location.href = 'http://localhost:3000/quotes/'
     })
@@ -123,9 +119,13 @@ class CreateQuote extends Component {
         <label>Quote Number</label><input style={{'margin-left':'20px'}} type='text' value={this.state.quoteNumber} placeholder='Quote Number' onChange={e => {this.setState({quoteNumber:e.target.value})}}/>
         <label style={{'margin-left':'34px'}}>Customers</label><input style={{'margin-left':'34px'}} type='text' value={this.state.customers} placeholder='Customers' onChange={e => {this.setState({customers:e.target.value})}}/>
         <label style={{'margin-left':'34px'}}>Total</label><input type='text' style={{'margin-left':'34px'}} value={this.state.total} placeholder='Total Value' onChange={e => {this.setState({total:e.target.value})}}/><br></br>
-        <label>Created Date</label><input type='text' style={{'margin-left':'34px'}} value={this.state.createdDate} placeholder='Today' onChange={e => {this.setState({createdDate:e.target.value})}}/>
+        <label>Created Date</label><input type='text' style={{'margin-left':'34px'}} value={this.state.createdDate} placeholder='Today' onChange={e => {this.setState({createdDate:e.target.value})}} disabled/>
         <label style={{'margin-left':'34px'}}>Salesperson</label><input type='text' style={{'margin-left':'24px'}} value={this.state.salesperson} placeholder='Salesperson Name' onChange={e => {this.setState({salesperson:e.target.value})}}/>
-        <label style={{'margin-left':'34px'}}>Status</label><select style={{'margin-left':'25px'}}><option value='order'>Order</option><option value='Done'>Done</option></select><br></br>
+        <label style={{'margin-left':'34px'}}>Status</label>
+          <select style={{'margin-left':'25px'}} value={this.state.status} onChange={e => {this.setState({status: e.target.value})}}>
+            <option value={0}>Order</option>
+            <option value={1}>Done</option>
+          </select><br></br>
         <label>Expected Date</label><input type='text' style={{'margin-left':'20px'}} value={this.state.expectedDate} placeholder='Expected Date' onChange={e => {this.setState({expectedDate:e.target.value})}}/>
         <label style={{'margin-left':'34px'}}>Company</label><input type='text' style={{'margin-left':'44px'}} value={this.state.company} placeholder='Company' onChange={e => {this.setState({company:e.target.value})}}/>
 
@@ -134,7 +134,6 @@ class CreateQuote extends Component {
       <div className='adding-part-data'>
         <div className = 'adding-part-data-headers'>
           <table>
-            <th className='groupNumber'>Group Number</th>
             <th className='modelNumber'>Model Number</th>
             <th className='partNumber'>Part Number</th>
             <th className='description'>Description</th>

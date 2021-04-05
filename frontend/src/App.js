@@ -1,11 +1,13 @@
 import './App.css';
-import {Route, BrowserRouter as Router, Link} from 'react-router-dom'
+import {Route, BrowserRouter as Router} from 'react-router-dom'
 import Login from './Pages/Login'
 import Signup from './Pages/Signup'
 import Home from './Pages/Home'
 import Quotes from './Pages/Quotes'
 import Invoices from './Pages/Invoices'
 import CreateQuote from './Pages/CreateQuote'
+import ConvertToInvoice from './Pages/ConvertToInvoice'
+import CreateInvoice from './Pages/CreateInvoice'
 
 function App() {
 
@@ -18,7 +20,9 @@ function App() {
         <Route path='/home' exact component={Home}/>
         <Route path='/quotes' exact component={Quotes}/>
         <Route path='/quotes/create-quote' exact component={CreateQuote}/>
+        <Route path='/quotes/convert-to-invoice' exact component={ConvertToInvoice}/>
         <Route path='/invoices' exact component={Invoices}/>
+        <Route path='/invoices/create-invoice' exact component={CreateInvoice}/>
       </Router>
     </div>
   );

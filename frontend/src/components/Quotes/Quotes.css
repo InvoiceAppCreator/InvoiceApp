@@ -204,3 +204,124 @@ body {
 #quotesTable-buttons button:hover {
   background-color: #08491f
 }
+
+.edit-delete-add-quote {
+  position: absolute;
+  width: 93%;
+  height: 31.5em;
+  background-color: black;
+  margin-left: 2.5%;
+  margin-top: 2%;
+  padding: 1%;
+}
+
+#quote-information {
+  width: 96%;
+  padding: 2%;
+  background-color: #30a309;
+}
+
+#quote-information label {
+  color: white;
+  font-size: 20px;
+  line-height: 45px;
+}
+
+#quote-information input {
+  padding: 0.5%;
+  width: 20%;
+  border-radius: 20px;
+  border: none;
+  text-align: center;
+}
+
+#quote-tableParts {
+  width: 100%;
+  height: 16em;
+  margin-top: 1%;
+  background-color: white;
+  border: 2px solid black;
+  margin-left: -1.5px;
+  overflow: scroll;
+}
+
+#quote-tableParts-1 table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+#quote-tableParts-1 th {
+  padding: 10px;
+  background-color: #30a309;
+  color: white;
+}
+
+.quote-tableParts-1-modelNumber, .quote-tableParts-1-partNumber {
+  max-width: 40px;
+  min-width: 40px;
+}
+
+.quote-tableParts-1-description {
+  max-width: 100px;
+  min-width: 100px;
+}
+
+.quote-tableParts-1-cost, .quote-tableParts-1-price, .quote-tableParts-1-onHand, .quote-tableParts-1-comitted, .quote-tableParts-1-delete {
+  max-width: 20px;
+  min-width: 20px;
+}
+
+.quote-tableParts-1-delete {
+  text-align: center;
+  border-left: 2px solid black;
+}
+
+#quote-tableParts-2 {
+  width: 100%;
+}
+
+#quote-tableParts-2 table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#quote-tableParts-2 td {
+  padding: 10px;
+  background-color: #f2f2f2;
+  color: white;
+  overflow: hidden
+
+}
+
+#quote-tableParts-2 td {
+  color:black;
+  border-bottom: 1px solid black;
+  padding: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#quote-tableParts-2 tr:nth-child(even){background-color: #f2f2f2;}
+
+#quote-tableParts-2 tr:hover {
+  background-color: #ddd;
+}
+
+#quote-buttons-for-edit-delete-add {
+  width: 100%;
+  margin-top: 1%;
+}
+
+#quote-buttons-for-edit-delete-add button {
+  width: 20%;
+  background-color: #30a309;
+  border:none;
+  padding: 1%;
+  color: white;
+}
+
+#quote-buttons-for-edit-delete-add button:hover {
+  background-color: #08491f
+}

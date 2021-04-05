@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, InvoiceList, QuoteList, Part
+from .models import User, InvoiceList, QuoteList, Part, invoicePart
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,4 +19,9 @@ class QuoteListSerializer(serializers.ModelSerializer):
 class PartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Part
+        fields = '__all__'
+
+class invoicePartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = invoicePart
         fields = '__all__'

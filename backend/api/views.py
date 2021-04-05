@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer, InvoiceListSerializer, QuoteListSerializer, PartSerializer
-from .models import User, InvoiceList, QuoteList, Part
+from .serializers import UserSerializer, InvoiceListSerializer, QuoteListSerializer, PartSerializer, invoicePartSerializer
+from .models import User, InvoiceList, QuoteList, Part, invoicePart
 from rest_framework.decorators import api_view
 
 # Create your views here.
@@ -39,12 +39,28 @@ class Users(APIView):
         except:
             return Response({'message':'Wrong'})
 
-class InvoiceLists(APIView):
-    def get_query(self):
-        invoiceList = InvoiceList.objects.all()
-        return invoiceList
-    def get(self, request):
-        invoiceList = self.get_query()
+@api_view(['GET', 'POST'])
+def InvoiceLists(request, username):
+    invoiceList = InvoiceList.objects.all()
+    serializer = InvoiceListSerializer(invoiceList, many=True)
+    if request.method == 'GET':
+        user = User.objects.get(username=username)
+        userID = user.id
+        authInvoiceList = InvoiceList.objects.filter(author=userID)
+        serialize = InvoiceListSerializer(authInvoiceList, many=True)
+        return Response(serialize.data)
+    elif request.method == 'POST':
+        data = request.data
+        author = User.objects.get(username=data['author'])
+        addedData = InvoiceList.objects.create(
+            author=author,
+            invoiceNumber=data['invoiceNumber'],
+            customer=data['customer'],
+            createdDate=data['createdDate'],
+            dueDate=data['dueDate'],
+            totalDue=data['totalDue'],
+            status=data['status']
+        )
         serializer = InvoiceListSerializer(invoiceList, many=True)
         return Response(serializer.data)
 
@@ -76,10 +92,15 @@ def QuoteLists(request, username):
         return Response(serializer.data)
 
 @api_view(['GET', 'POST'])
-def Parts(request):
+def Parts(request, username):
     partList = Part.objects.all()
     serializer = PartSerializer(partList, many=True)
     if request.method == 'GET':
+        data = request.data
+        user = User.objects.get(username=username)
+        userID = user.id
+        partList = Part.objects.filter(author=userID)
+        serializer = PartSerializer(partList, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
         data = request.data
@@ -87,7 +108,6 @@ def Parts(request):
         addedData = Part.objects.create(
             author=author,
             partQuoteNumber=data['partQuoteNumber'],
-            partGroupCode=data['partGroupCode'],
             partModelNumber=data['partModelNumber'],
             partNumber=data['partNumber'],
             partDescription=data['partDescription'],
@@ -98,4 +118,40 @@ def Parts(request):
         )
         addedData.save()
         serializer = PartSerializer(partList, many=True)
+        return Response(serializer.data)
+
+@api_view(['GET'])
+def partSearch(request, username):
+    if request.method == 'GET':
+        user = User.objects.get(username=username)
+        userID = user.id
+        data = QuoteList.objects.filter(author=userID)
+        serializer = QuoteListSerializer(data, many=True)
+        return Response(serializer.data)
+
+@api_view(['GET', 'POST'])
+def invoiceParts(request, username):
+    invoicePartsList = invoicePart.objects.all()
+    serializer = invoicePartSerializer(invoicePartsList, many=True)
+    if request.method == 'GET':
+        data = request.data
+        user = User.objects.get(username=username)
+        userID = user.id
+        invoicePartsList = invoicePart.objects.filter(author=userID)
+        serializer = invoicePartSerializer(invoicePartsList, many=True)
+        return Response(serializer.data)
+    if request.method == 'POST':
+        data = request.data
+        author = User.objects.get(username=data['author'])
+        addedData = invoicePart.objects.create(
+            author=author,
+            itemCode=data['itemCode'],
+            partInvoiceNumber=data['partInvoiceNumber'],
+            description=data['description'],
+            quantity=data['quantity'],
+            unitPrice=data['unitPrice'],
+            totalPrice=data['totalPrice']
+        )
+        addedData.save()
+        serializer = invoicePartSerializer(invoicePartsList, many=True)
         return Response(serializer.data)
