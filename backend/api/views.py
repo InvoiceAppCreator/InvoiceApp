@@ -64,7 +64,7 @@ def InvoiceLists(request, username):
         serializer = InvoiceListSerializer(invoiceList, many=True)
         return Response(serializer.data)
 
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def QuoteLists(request, username):
     quoteList = QuoteList.objects.all()
     serializer = QuoteListSerializer(quoteList, many=True)
@@ -90,8 +90,32 @@ def QuoteLists(request, username):
         )
         serializer = QuoteListSerializer(quoteList, many=True)
         return Response(serializer.data)
+    elif request.method == 'DELETE':
+        data = request.data
+        user = User.objects.get(username=username)
+        userID = user.id
+        for quoteNumber in request.data:
+            filteredData = QuoteList.objects.filter(author=userID, quoteNumber=quoteNumber).delete()
+        return Response(request.data)
+    elif request.method == 'PUT':
+        data = request.data
+        user = User.objects.get(username=username)
+        userID = user.id
 
-@api_view(['GET', 'POST'])
+        quoteData = QuoteList.objects.get(author=userID, id=data['quoteNumberOriginal'])
+        quoteData.quoteNumber = data['quoteNumber']
+        quoteData.createdDate = data['createdDate']
+        quoteData.expectedDate = data['expectedDate']
+        quoteData.customer = data['customer']
+        quoteData.salesperson = data['salesperson']
+        quoteData.company = data['company']
+        quoteData.total = data['total']
+        quoteData.status = data['status']
+        quoteData.save()
+
+        return Response(request.data)
+
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def Parts(request, username):
     partList = Part.objects.all()
     serializer = PartSerializer(partList, many=True)
@@ -119,6 +143,52 @@ def Parts(request, username):
         addedData.save()
         serializer = PartSerializer(partList, many=True)
         return Response(serializer.data)
+    elif request.method == 'DELETE':
+        data = request.data
+        user = User.objects.get(username=username)
+        userID = user.id
+        if request.data[1] =='allDelete':
+            for idNumber in request.data[0]:
+                filteredData = Part.objects.filter(author=userID, id=idNumber).delete()
+            return Response({'allDelete':request.data})
+        elif request.data[1] == 'notDelete':
+            for modelNumber in request.data[0]:
+                filteredData = Part.objects.filter(author=userID, partModelNumber=modelNumber).delete()
+            return Response({'notAllDelete':request.data})
+
+    elif request.method == 'PUT':
+        data = request.data
+        user = User.objects.get(username=username)
+        userID = user.id
+        try:
+            partData = Part.objects.get(author=userID, id=data['quoteNumberOriginal'])
+            partData.partQuoteNumber = data['partQuoteNumber']
+            partData.partModelNumber = data['partModelNumber']
+            partData.partNumber = data['partNumber']
+            partData.partDescription = data['partDescription']
+            partData.partCost = data['partCost']
+            partData.partPrice = data['partPrice']
+            partData.partQtyOnHand = data['partQtyOnHand']
+            partData.partQtyCommitted = data['partQtyCommitted']
+            partData.save()
+            return Response(request.data)
+        except:
+            author = User.objects.get(username=data['author'])
+            partData = Part.objects.create(
+                author=author,
+                partQuoteNumber=data['partQuoteNumber'],
+                partModelNumber=data['partModelNumber'],
+                partNumber=data['partNumber'],
+                partDescription=data['partDescription'],
+                partCost=data['partCost'],
+                partPrice=data['partPrice'],
+                partQtyOnHand=data['partQtyOnHand'],
+                partQtyCommitted=data['partQtyCommitted']
+            )
+            partData.save()
+            serializer = PartSerializer(partList, many=True)
+            return Response(serializer.data)
+
 
 @api_view(['GET'])
 def partSearch(request, username):

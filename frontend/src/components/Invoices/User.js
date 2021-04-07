@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import './Invoices.css'
-import image from '../Quotes/Images/sampleFace3.png'
+import image from '../Quotes/Images/sampleFace2.png'
 
 class User extends Component {
     render() {

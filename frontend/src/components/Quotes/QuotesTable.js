@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import TableTemplate from './TableTemplate'
 import './Quotes.css'
 import image from '../Home/Images/SunBackground.jpg'
-import image2 from './Images/sampleFace3.png'
+import image2 from './Images/sampleFace2.png'
 import axios from 'axios'
 import {Link} from 'react-router-dom';
 import EditTable from './EditTable'
@@ -17,6 +17,7 @@ class QuotesTable extends Component {
       opacity: '1',
       quoteID: 0,
 
+      quoteNumberOriginal: '',
       quoteNumber: '',
       customer: '',
       total: '',
@@ -36,6 +37,15 @@ class QuotesTable extends Component {
       onHand: [],
       comitted: [],
       delete: [],
+
+      modelNumberSave: [],
+      partNumberSave: [],
+      descriptionSave: [],
+      costSave: [],
+      priceSave: [],
+      onHandSave: [],
+      comittedSave: [],
+      deleteSave: [],
 
       partID: 0,
       partData: [],
@@ -107,6 +117,9 @@ class QuotesTable extends Component {
         })
       })
     })
+    this.setState({
+      quoteNumberOriginal: id
+    })
   }
 
   cancelEdit = (event) => {
@@ -125,6 +138,15 @@ class QuotesTable extends Component {
       delete: [],
       partData: [],
       partID: 0,
+
+      modelNumberSave: [],
+      partNumberSave: [],
+      descriptionSave: [],
+      costSave: [],
+      priceSave: [],
+      onHandSave: [],
+      comittedSave: [],
+      deleteSave: [],
     })
   }
 
@@ -135,20 +157,114 @@ class QuotesTable extends Component {
     })
   }
 
-  deleteSelected =() => {
+  deleteSelected = () => {
     for (var i = 0; i < this.state.partID; i++) {
       if (document.getElementById(`quote-tableParts-1-delete${i}`) !== null) {
         if (document.getElementById(`quote-tableParts-1-delete${i}`).checked) {
           document.getElementById(`quote-tableParts-1-delete${i}`).checked = false;
           var arr = this.state.partData
           arr[i] = ''
+          if (document.getElementById(`quote-tableParts-1-modelNumber${i}`) !== null && document.getElementById(`quote-tableParts-1-modelNumber${i}`).innerHTML != '') {
+            this.state.deleteSave.push(document.getElementById(`quote-tableParts-1-modelNumber${i}`).innerHTML)
+          }
           this.setState({partData: arr})
-          console.log("Deleting..." + i)
         } else {
           continue
         }
       }
     }
+  }
+
+  saveQuote = () => {
+
+    axios.delete(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`, {'data': [this.state.deleteSave, 'notDelete']})
+
+    for (var i = 0; i < this.state.partID; i++) {
+      if (document.getElementById(`quote-tableParts-1-modelNumber${i}`) !== null &&
+          document.getElementById(`quote-tableParts-1-partNumber${i}`) !== null &&
+          document.getElementById(`quote-tableParts-1-description${i}`) !== null &&
+          document.getElementById(`quote-tableParts-1-cost${i}`) !== null &&
+          document.getElementById(`quote-tableParts-1-price${i}`) !== null &&
+          document.getElementById(`quote-tableParts-1-onHand${i}`) !== null &&
+          document.getElementById(`quote-tableParts-1-comitted${i}`) !== null) {
+            this.state.modelNumberSave.push(document.getElementById(`quote-tableParts-1-modelNumber${i}`).innerHTML)
+            this.state.partNumberSave.push(document.getElementById(`quote-tableParts-1-partNumber${i}`).innerHTML)
+            this.state.descriptionSave.push(document.getElementById(`quote-tableParts-1-description${i}`).innerHTML)
+            this.state.costSave.push(document.getElementById(`quote-tableParts-1-cost${i}`).innerHTML)
+            this.state.priceSave.push(document.getElementById(`quote-tableParts-1-price${i}`).innerHTML)
+            this.state.onHandSave.push(document.getElementById(`quote-tableParts-1-onHand${i}`).innerHTML)
+            this.state.comittedSave.push(document.getElementById(`quote-tableParts-1-comitted${i}`).innerHTML)
+
+            var infoToBeUpdated = {
+              'quoteNumberOriginal': this.state.databaseID[i],
+              'partQuoteNumber': this.state.quoteNumber,
+              'author': document.cookie.split(';')[0].split('=')[1],
+              'partModelNumber': this.state.modelNumberSave[i],
+              'partNumber': this.state.partNumberSave[i],
+              'partDescription': this.state.descriptionSave[i],
+              'partCost': this.state.costSave[i],
+              'partPrice': this.state.priceSave[i],
+              'partQtyOnHand': this.state.onHandSave[i],
+              'partQtyCommitted': this.state.comittedSave[i]
+            }
+
+            axios.put(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`, infoToBeUpdated).then(res => {
+
+            })
+
+      }
+
+    }
+    var updatedHeaderInfo = {
+      'author': document.cookie.split(';')[0].split('=')[1],
+      'quoteNumberOriginal': this.state.quoteNumberOriginal,
+      'quoteNumber': this.state.quoteNumber,
+      'createdDate': this.state.createdDate,
+      'expectedDate': this.state.expectedDate,
+      'customer': this.state.customer,
+      'salesperson': this.state.salesperson,
+      'company': this.state.company,
+      'total': this.state.total,
+      'status': this.state.status
+    }
+
+
+    axios.put(`http://localhost:8000/api/quoteList/${document.cookie.split(';')[0].split('=')[1]}`, updatedHeaderInfo).then(res => {
+      window.location.href = 'http://localhost:3000/quotes'
+    })
+    this.setState({
+      display: 'none',
+      opacity: '1',
+
+      databaseID: [],
+      modelNumber: [],
+      partNumber: [],
+      description: [],
+      cost: [],
+      price: [],
+      onHand: [],
+      comitted: [],
+      delete: [],
+      partData: [],
+      partID: 0,
+
+      modelNumberSave: [],
+      partNumberSave: [],
+      descriptionSave: [],
+      costSave: [],
+      priceSave: [],
+      onHandSave: [],
+      comittedSave: [],
+      deleteSave: [],
+    })
+  }
+
+  deleteQuote = (event) => {
+    axios.delete(`http://localhost:8000/api/quoteList/${document.cookie.split(';')[0].split('=')[1]}`, {'data':[this.state.quoteNumber]}).then(res => {
+      axios.delete(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`, {'data': [this.state.databaseID, 'allDelete']}).then(res => {
+        window.location.href = 'http://localhost:3000/quotes'
+      })
+    })
   }
 
 
@@ -215,18 +331,18 @@ class QuotesTable extends Component {
 
         <div className='edit-delete-add-quote' style={{'display':this.state.display}}>
           <div id='quote-information'>
-            <label style={{'margin-left':'30px'}}>Quote Number</label><input value={this.state.quoteNumber} type='text' style={{'margin-left':'18px'}}/>
-            <label style={{'margin-left':'20px'}}>Customer</label><input type='text' value={this.state.customer} style={{'margin-left':'25px'}}/>
-            <label style={{'margin-left':'20px'}}>Total</label><input type='text' value={this.state.total} style={{'margin-left':'20px'}}/><br></br>
-            <label style={{'margin-left':'30px'}}>Created Date</label><input type='text' value={this.state.createdDate} style={{'margin-left':'32px'}}/>
-            <label style={{'margin-left':'20px'}}>Salesperson</label><input type='text' value={this.state.salesperson} style={{'margin-left':'7px'}}/>
+            <label style={{'margin-left':'30px'}}>Quote Number</label><input value={this.state.quoteNumber} onChange={e => {this.setState({quoteNumber:e.target.value})}} placeholder='Quote Number' type='text' style={{'margin-left':'18px'}}/>
+            <label style={{'margin-left':'20px'}}>Customer</label><input type='text' value={this.state.customer} onChange={e => {this.setState({customer:e.target.value})}} placeholder='Customer' style={{'margin-left':'25px'}}/>
+            <label style={{'margin-left':'20px'}}>Total</label><input type='text' value={this.state.total} onChange={e => {this.setState({total:e.target.value})}} placeholder='Total' style={{'margin-left':'20px'}}/><br></br>
+            <label style={{'margin-left':'30px'}}>Created Date</label><input type='text' value={this.state.createdDate} placeholder='dd/mm//yyyy'  style={{'margin-left':'32px'}}/>
+            <label style={{'margin-left':'20px'}}>Salesperson</label><input type='text' value={this.state.salesperson} onChange={e => {this.setState({salesperson:e.target.value})}} placeholder='Salesperson' style={{'margin-left':'7px'}}/>
             <label style={{'margin-left':'20px'}} >Status</label>
-              <select style={{'margin-left':'14px'}} value={this.state.status}>
-                <option value={false}>Order</option>
-                <option value={true}>Done</option>
+              <select style={{'margin-left':'14px'}} value={this.state.status} onChange={e => {this.setState({status:e.target.value})}}>
+                <option value={0}>Order</option>
+                <option value={1}>Done</option>
               </select><br></br>
-            <label style={{'margin-left':'30px'}}>Expected Date</label><input value={this.state.expectedDate} type='text' style={{'margin-left':'20px'}}/>
-            <label style={{'margin-left':'20px'}}>Company</label><input type='text' value={this.state.company} style={{'margin-left':'24px'}}/>
+            <label style={{'margin-left':'30px'}}>Expected Date</label><input value={this.state.expectedDate} onChange={e => {this.setState({expectedDate:e.target.value})}} placeholder='dd/mm//yyyy' type='text' style={{'margin-left':'20px'}}/>
+            <label style={{'margin-left':'20px'}}>Company</label><input type='text' value={this.state.company} onChange={e => {this.setState({company:e.target.value})}} placeholder='company' style={{'margin-left':'24px'}}/>
 
           </div>
           <div id='quote-tableParts'>
@@ -256,11 +372,11 @@ class QuotesTable extends Component {
             </div>
           </div>
           <div id='quote-buttons-for-edit-delete-add'>
-            <button>Save Quote</button>
+            <button onClick={this.saveQuote}>Save Quote</button>
             <button style={{'border-right':'2px solid black'}} onClick={this.cancelEdit}>Cancel</button>
             <button onClick={this.addPart}>Add Part</button>
             <button onClick={this.deleteSelected}>Delete Selected</button>
-            <button>Delete Quote</button>
+            <button onClick={this.deleteQuote}>Delete Quote</button>
           </div>
         </div>
       </>
