@@ -1,10 +1,7 @@
-import React, { Component } from 'react'
+import React from 'react'
 import './Home.css'
-import {useCookies} from 'react-cookie';
 
 function Buttons() {
-
-  const [cookies, setCookie] = useCookies(['user']);
 
   function goToQuotes() {
     window.location.href = '/quotes'

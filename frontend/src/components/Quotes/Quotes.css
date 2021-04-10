@@ -73,7 +73,7 @@ body {
 }
 
 #quotes-buttons-function-buttons button{
-  width: 25%;
+  width: 33.3%;
   height: 70px;
   font-size: 1em;
   background-color: #30a309;
@@ -192,7 +192,7 @@ body {
   background-color: #30a309;
   color: white;
   width: 100%;
-  height: 33.3%;
+  height: 100%;
   padding: 15px 32px;
   text-align: center;
   font-size: 16px;
@@ -208,7 +208,7 @@ body {
 .edit-delete-add-quote {
   position: absolute;
   width: 93%;
-  height: 31.5em;
+  height: 34em;
   background-color: black;
   margin-left: 2.5%;
   margin-top: 2%;
@@ -322,6 +322,53 @@ body {
   color: white;
 }
 
-#quote-buttons-for-edit-delete-add button:hover {
+#quote-buttons-for-edit-delete-add button:hover, #pdf-email button:hover {
   background-color: #08491f
+}
+
+#pdf-email {
+  width: 100%;
+}
+
+#pdf-email button {
+  width: 50%;
+  background-color: #30a309;
+  border:none;
+  padding: 1%;
+  color: white;
+}
+
+#importing-page {
+  margin-left: 28%;
+  margin-top: 10%;
+  width: 40%;
+  padding: 2%;
+  background-color: #30a309;
+  position: absolute;
+  z-index: 1;
+}
+
+#importing-page label {
+  color: white;
+  font-size: 1.4em;;
+}
+
+#importing-page input {
+  color: white;
+  width: 100%;
+  margin-top: 20px;
+}
+
+#importing-page button {
+  width: 50%;
+  background-color: #08491f;
+  border:none;
+  padding: 2%;
+  color: white;
+  margin-top: 20px;
+
+}
+
+#importing-page button:hover {
+  background-color: #94ad2e
 }

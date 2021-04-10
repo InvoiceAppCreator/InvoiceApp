@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import Nav from '../components/Home/Nav'
 import Welcome from '../components/Home/Welcome'
 

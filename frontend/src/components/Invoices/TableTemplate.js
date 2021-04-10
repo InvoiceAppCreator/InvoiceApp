@@ -3,7 +3,7 @@ import './Invoices.css'
 
 function TableTemplate(props) {
   return (
-    <tr>
+    <tr onClick={props.myFunction.bind(this, props.id)}>
       <td id='invoiceNumber'>{props.invoiceNumber}</td>
       <td id='invoice-customer'>{props.customer}</td>
       <td id='invoice-created'>{props.createdDate}</td>

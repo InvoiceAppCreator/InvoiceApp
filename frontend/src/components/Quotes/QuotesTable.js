@@ -4,7 +4,6 @@ import './Quotes.css'
 import image from '../Home/Images/SunBackground.jpg'
 import image2 from './Images/sampleFace2.png'
 import axios from 'axios'
-import {Link} from 'react-router-dom';
 import EditTable from './EditTable'
 
 class QuotesTable extends Component {
@@ -17,13 +16,15 @@ class QuotesTable extends Component {
       opacity: '1',
       quoteID: 0,
 
+      display2: 'none',
+
       quoteNumberOriginal: '',
       quoteNumber: '',
       customer: '',
       total: '',
       createdDate: '',
       salesperson: '',
-      status: false,
+      status: '',
       expectedDate: '',
       company: '',
 
@@ -49,6 +50,8 @@ class QuotesTable extends Component {
 
       partID: 0,
       partData: [],
+
+      file: null,
     }
   }
 
@@ -67,6 +70,8 @@ class QuotesTable extends Component {
     })
   }
 
+  // -------------------- Pop Up Page START --------------------
+
   sendIDtoEditPage = (id) => {
     this.setState({
       display: 'block',
@@ -76,7 +81,7 @@ class QuotesTable extends Component {
 
     axios.get(`http://localhost:8000/api/quoteList/${document.cookie.split(';')[0].split('=')[1]}`).then(res => {
       for (var i = 0; i < res.data.length; i++) {
-        if (res.data[i].id == id) {
+        if (res.data[i].id === id) {
           this.setState({
             quoteNumber: res.data[i].quoteNumber,
             customer: res.data[i].customer,
@@ -91,7 +96,7 @@ class QuotesTable extends Component {
       }
       axios.get(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`).then(res => {
         res.data.filter((x) => {
-          if (x.partQuoteNumber == this.state.quoteNumber) {
+          if (x.partQuoteNumber === this.state.quoteNumber) {
             this.state.databaseID.push(x.id)
             this.state.modelNumber.push(x.partModelNumber)
             this.state.partNumber.push(x.partNumber)
@@ -114,6 +119,7 @@ class QuotesTable extends Component {
               partID: this.state.partID + 1,
             })
           }
+          return 0
         })
       })
     })
@@ -126,6 +132,7 @@ class QuotesTable extends Component {
     this.setState({
       display: 'none',
       opacity: '1',
+      display2: 'none',
 
       databaseID: [],
       modelNumber: [],
@@ -164,7 +171,7 @@ class QuotesTable extends Component {
           document.getElementById(`quote-tableParts-1-delete${i}`).checked = false;
           var arr = this.state.partData
           arr[i] = ''
-          if (document.getElementById(`quote-tableParts-1-modelNumber${i}`) !== null && document.getElementById(`quote-tableParts-1-modelNumber${i}`).innerHTML != '') {
+          if (document.getElementById(`quote-tableParts-1-modelNumber${i}`) !== null && document.getElementById(`quote-tableParts-1-modelNumber${i}`).innerHTML !== '') {
             this.state.deleteSave.push(document.getElementById(`quote-tableParts-1-modelNumber${i}`).innerHTML)
           }
           this.setState({partData: arr})
@@ -267,26 +274,62 @@ class QuotesTable extends Component {
     })
   }
 
+  // -------------------- Pop Up Page END --------------------
+
+  importScreen = (event) => {
+    this.setState({
+      display2: 'block',
+      opacity: '0.3',
+    })
+  }
+
+  submitFile = (event) => {
+    const formData = new FormData()
+    formData.append('files', this.state.file)
+    axios.post(`http://localhost:8000/api/uploadFile/${document.cookie.split(';')[0].split('=')[1]}`, formData).then(res => {
+      console.log(res)
+      this.setState({
+        display2: 'none',
+        opacity: '1',
+      })
+      window.location.href = 'http://localhost:3000/quotes'
+    })
+
+  }
+
+
+
+  handleUpload = (event) => {
+    this.setState({
+      file: event.target.files[0]
+    })
+  }
 
   render() {
     return (
       <>
         <div className='quotes-user' style={{'opacity':this.state.opacity}}>
-          <img src={image2}/>
+          <img src={image2} alt=''/>
           <hr id='user-line'></hr>
           <p>{document.cookie.split(';')[0].split('=')[1]}</p>
           <p>{`${document.cookie.split(';')[0].split('=')[1]}@gmail.com`}</p>
         </div>
         <div className='quotes-buttons' style={{'opacity':this.state.opacity}}>
           <div id='quotes-buttons-background-image'>
-            <img src={image}/>
+            <img src={image} alt=''/>
           </div>
           <div id='quotes-buttons-function-buttons' >
             <button id='quotes-button-functions-buttons-create' onClick={this.createQuote}>Create</button>
             <button onClick={this.convertToInvoice} >To Invoice</button>
-            <button>Export</button>
-            <button id='quotes-button-functions-buttons-import'>Import</button>
+            <button id='quotes-button-functions-buttons-import' onClick={this.importScreen}>Import</button>
           </div>
+        </div>
+
+        <div id='importing-page' style={{display:this.state.display2}}>
+          <label>Import Excel File</label><br></br>
+          <input type='file' accept='.xlsx' onChange={this.handleUpload}/><br></br>
+          <button onClick={this.submitFile}>Import File</button>
+          <button onClick={this.cancelEdit}>Cancel</button>
         </div>
 
         <div className='quotes-quotesTable' style={{'opacity':this.state.opacity}}>
@@ -315,7 +358,7 @@ class QuotesTable extends Component {
                                                           salesperson={info.salesperson}
                                                           company={info.company}
                                                           total={info.total}
-                                                          status={info.status ? 'Done' : 'Order'}
+                                                          status={info.status}
                                                           myFunction={this.sendIDtoEditPage}
                                                           id={info.id}/>)
               }
@@ -324,8 +367,6 @@ class QuotesTable extends Component {
           </div>
           <div id='quotesTable-buttons' style={{'opacity':this.state.opacity}}>
             <button id='quotesTable-buttons-search'>Search</button>
-            <button>Edit</button>
-            <button id='quotesTable-buttons-delete'>Delete</button>
           </div>
         </div>
 
@@ -334,12 +375,12 @@ class QuotesTable extends Component {
             <label style={{'margin-left':'30px'}}>Quote Number</label><input value={this.state.quoteNumber} onChange={e => {this.setState({quoteNumber:e.target.value})}} placeholder='Quote Number' type='text' style={{'margin-left':'18px'}}/>
             <label style={{'margin-left':'20px'}}>Customer</label><input type='text' value={this.state.customer} onChange={e => {this.setState({customer:e.target.value})}} placeholder='Customer' style={{'margin-left':'25px'}}/>
             <label style={{'margin-left':'20px'}}>Total</label><input type='text' value={this.state.total} onChange={e => {this.setState({total:e.target.value})}} placeholder='Total' style={{'margin-left':'20px'}}/><br></br>
-            <label style={{'margin-left':'30px'}}>Created Date</label><input type='text' value={this.state.createdDate} placeholder='dd/mm//yyyy'  style={{'margin-left':'32px'}}/>
+            <label style={{'margin-left':'30px'}}>Created Date</label><input type='text' value={this.state.createdDate} disabled placeholder='dd/mm//yyyy'  style={{'margin-left':'32px'}}/>
             <label style={{'margin-left':'20px'}}>Salesperson</label><input type='text' value={this.state.salesperson} onChange={e => {this.setState({salesperson:e.target.value})}} placeholder='Salesperson' style={{'margin-left':'7px'}}/>
             <label style={{'margin-left':'20px'}} >Status</label>
               <select style={{'margin-left':'14px'}} value={this.state.status} onChange={e => {this.setState({status:e.target.value})}}>
-                <option value={0}>Order</option>
-                <option value={1}>Done</option>
+                <option value={'Order'}>Order</option>
+                <option value={'Done'}>Done</option>
               </select><br></br>
             <label style={{'margin-left':'30px'}}>Expected Date</label><input value={this.state.expectedDate} onChange={e => {this.setState({expectedDate:e.target.value})}} placeholder='dd/mm//yyyy' type='text' style={{'margin-left':'20px'}}/>
             <label style={{'margin-left':'20px'}}>Company</label><input type='text' value={this.state.company} onChange={e => {this.setState({company:e.target.value})}} placeholder='company' style={{'margin-left':'24px'}}/>
@@ -374,9 +415,14 @@ class QuotesTable extends Component {
           <div id='quote-buttons-for-edit-delete-add'>
             <button onClick={this.saveQuote}>Save Quote</button>
             <button style={{'border-right':'2px solid black'}} onClick={this.cancelEdit}>Cancel</button>
-            <button onClick={this.addPart}>Add Part</button>
+            <button style={{'border-right':'2px solid black'}} onClick={this.addPart}>Add Part</button>
             <button onClick={this.deleteSelected}>Delete Selected</button>
             <button onClick={this.deleteQuote}>Delete Quote</button>
+          </div>
+
+          <div id='pdf-email'>
+            <button style={{'border-right':'2px solid black'}}>Export To PDF</button>
+            <button>Email Quote</button>
           </div>
         </div>
       </>

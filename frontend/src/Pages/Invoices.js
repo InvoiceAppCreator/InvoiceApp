@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import Nav from '../components/Invoices/Nav'
-import User from '../components/Invoices/User'
 import InvoiceTable from '../components/Invoices/InvoiceTable'
 
 export class Invoices extends Component {
@@ -8,7 +7,6 @@ export class Invoices extends Component {
         return (
             <div>
               <Nav/>
-              <User/>
               <InvoiceTable/>
             </div>
         )

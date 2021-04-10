@@ -69,7 +69,7 @@
 }
 
 #buttons-function-buttons button{
-  width: 33.33%;
+  width: 50%;
   height: 70px;
   font-size: 1em;
   background-color: #30a309;
@@ -139,8 +139,6 @@
   width: 100px;
 }
 
-
-
 #invoicesTable-table-table {
   width: 100%;
   height: 282px;
@@ -168,11 +166,6 @@
   background-color: #ddd;
 }
 
-
-
-
-
-
 #invoicesTable-buttons {
   float: left;
   width: 10%;
@@ -184,7 +177,7 @@
   background-color: #30a309;
   color: white;
   width: 100%;
-  height: 33.3%;
+  height: 100%;
   padding: 15px 32px;
   text-align: center;
   font-size: 16px;
@@ -195,4 +188,36 @@
 
 #invoicesTable-buttons button:hover {
   background-color: #08491f
+}
+
+.edit-delete-add-invoice {
+  position: absolute;
+  width: 93%;
+  height: 31.5em;
+  background-color: black;
+  margin-left: 2.5%;
+  margin-top: 2%;
+  padding: 1%;
+}
+
+.invoice-tableParts-1-itemCode {
+  max-width: 20px;
+  min-width: 20px;
+}
+
+.invoice-tableParts-1-description {
+  max-width: 90px;
+  min-width: 90px;
+}
+
+.invoice-tableParts-1-quantity, .invoice-tableParts-1-unitPrice, .invoice-tableParts-1-totalPrice{
+  max-width: 20px;
+  min-width: 20px;
+}
+
+.invoice-tableParts-1-delete {
+  max-width: 8px;
+  min-width: 8px;
+  text-align: center;
+  border-left: 2px solid black;
 }

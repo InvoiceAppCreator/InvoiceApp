@@ -8,5 +8,7 @@ urlpatterns = [
     path('part-invoice/<username>', views.invoiceParts),
     path('quoteList/<username>', views.QuoteLists),
     path('parts/<username>', views.Parts),
-    path('part-search/<username>', views.partSearch)
+    path('part-search/<username>', views.partSearch),
+    path('uploadFile/<username>', views.uploadFile),
+    path('uploadFileInvoice/<username>', views.uploadFileInvoice)
 ]

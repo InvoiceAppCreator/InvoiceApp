@@ -58,14 +58,14 @@ class ConvertToInvoice extends Component {
           total: 0,
           customer: '',
         })
-        if (this.state.quoteNumber == '') {
+        if (this.state.quoteNumber === '') {
 
         } else if (x.quoteNumber.includes(this.state.quoteNumber)) {
-          if (this.state.quoteNumber == x.quoteNumber) {
+          if (this.state.quoteNumber === x.quoteNumber) {
             axios.get(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`).then(res => {
               this.state.partData.pop()
               for (var i = 0; i < res.data.length; i++) {
-                if (res.data[i].partQuoteNumber == x.quoteNumber) {
+                if (res.data[i].partQuoteNumber === x.quoteNumber) {
                   this.state.itemCode.push(res.data[i].partModelNumber)
                   this.state.description.push(res.data[i].partDescription)
                   this.state.quantity.push(res.data[i].partQtyCommitted)
@@ -91,6 +91,7 @@ class ConvertToInvoice extends Component {
             })
           }
         }
+        return 0
       })
     })
   }
@@ -169,6 +170,7 @@ class ConvertToInvoice extends Component {
                 } catch (e){
 
                 }
+                return 0
               })
             }
             </table>

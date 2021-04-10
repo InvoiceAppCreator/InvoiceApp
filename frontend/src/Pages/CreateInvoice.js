@@ -12,7 +12,7 @@ class CreateInvoice extends Component {
       total: '',
       createdDate: `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
       dueDate: '',
-      status: false,
+      status: 'Pending',
 
       itemCode: [],
       description: [],
@@ -108,8 +108,8 @@ class CreateInvoice extends Component {
           <label style={{'margin-left':'20px'}}>Due Date</label><input style={{'margin-left':'23px'}} type='text' placeholder='dd/mm/yyyy' value={this.state.dueDate} onChange={e => {this.setState({dueDate:e.target.value})}}/>
           <label style={{'margin-left':'20px'}}>Status</label>
           <select style={{'margin-left':'50px'}} value={this.state.status} onChange={e => {this.setState({status: e.target.value})}}>
-            <option value={0}>Pending</option>
-            <option value={1}>Paid</option>
+            <option value={'Pending'}>Pending</option>
+            <option value={'Paid'}>Paid</option>
           </select>
         </div>
 
@@ -134,6 +134,7 @@ class CreateInvoice extends Component {
                   } catch (e){
 
                   }
+                  return 0
                 })
               }
             </table>

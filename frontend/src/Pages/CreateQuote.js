@@ -1,7 +1,6 @@
 import React, {Component} from 'react'
 import '../components/Quotes/createQuote.css'
 import CreateQuoteTable from '../components/Quotes/createQuoteTable'
-import ReactDOM from 'react-dom';
 import axios from 'axios'
 
 class CreateQuote extends Component {
@@ -16,7 +15,7 @@ class CreateQuote extends Component {
       salesperson: '',
       expectedDate: '',
       company: '',
-      status: false,
+      status: 'Order',
 
       modelNumber: [],
       partNumber: [],
@@ -123,8 +122,8 @@ class CreateQuote extends Component {
         <label style={{'margin-left':'34px'}}>Salesperson</label><input type='text' style={{'margin-left':'24px'}} value={this.state.salesperson} placeholder='Salesperson Name' onChange={e => {this.setState({salesperson:e.target.value})}}/>
         <label style={{'margin-left':'34px'}}>Status</label>
           <select style={{'margin-left':'25px'}} value={this.state.status} onChange={e => {this.setState({status: e.target.value})}}>
-            <option value={0}>Order</option>
-            <option value={1}>Done</option>
+            <option value={'Order'}>Order</option>
+            <option value={'Done'}>Done</option>
           </select><br></br>
         <label>Expected Date</label><input type='text' style={{'margin-left':'20px'}} value={this.state.expectedDate} placeholder='Expected Date' onChange={e => {this.setState({expectedDate:e.target.value})}}/>
         <label style={{'margin-left':'34px'}}>Company</label><input type='text' style={{'margin-left':'44px'}} value={this.state.company} placeholder='Company' onChange={e => {this.setState({company:e.target.value})}}/>
@@ -154,6 +153,7 @@ class CreateQuote extends Component {
                 } catch (e){
 
                 }
+                return 0
               })
             }
           </table>

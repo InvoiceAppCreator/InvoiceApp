@@ -3,13 +3,10 @@ import {Link} from 'react-router-dom'
 import './Login.css'
 import axios from 'axios'
 import sha256 from 'crypto-js/sha256';
-import {BrowserRouter as Router, useHistory} from 'react-router-dom'
-import { useCookies } from 'react-cookie';
 
 
 function LoginBody() {
 
-  const [state, userState] = useState();
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
 
@@ -19,11 +16,11 @@ function LoginBody() {
     var data = {username:usernameData, login:true, password:passwordData}
     axios.post('http://localhost:8000/api/users/', data).then(res => {
       var userData = res.data
-      if (userData['message'] == 'Success') {
+      if (userData['message'] === 'Success') {
         //setCookie('username', username, {path:'/'})
         document.cookie=`username=${username}`
         window.location.href = 'http://localhost:3000/home/'
-      } else if (userData['message'] == 'Wrong') {
+      } else if (userData['message'] === 'Wrong') {
           alert('Incorrect Login')
       }
     })

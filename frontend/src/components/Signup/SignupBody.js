@@ -2,7 +2,6 @@ import React, {useState} from 'react'
 import './Signup.css'
 import axios from 'axios'
 import sha256 from 'crypto-js/sha256';
-import {useCookies} from 'react-cookie';
 
 function SignupBody() {
 
@@ -15,7 +14,7 @@ function SignupBody() {
 
 
   function submitDataToDB(event) {
-    if (password == [confirm_password] && password.length > 0 && confirm_password.length > 0) {
+    if (password === [confirm_password] && password.length > 0 && confirm_password.length > 0) {
       var data = {
         login: false,
         firstName: firstName,
@@ -30,9 +29,9 @@ function SignupBody() {
         window.location.href = 'http://localhost:3000/home/'
       })
 
-    } else if (password != confirm_password) {
+    } else if (password !== confirm_password) {
       alert('Password MisMatch')
-    } else if (password.length == 0 || confirm_password.length == 0) {
+    } else if (password.length === 0 || confirm_password.length === 0) {
       alert("Enter Password")
     }
     event.preventDefault()
