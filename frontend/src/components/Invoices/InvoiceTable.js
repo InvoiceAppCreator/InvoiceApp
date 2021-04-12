@@ -246,6 +246,41 @@ class InvoiceTable extends Component {
     })
   }
 
+  exportToPDF = (event) => {
+    var infoToBePDFed = {
+      'invoiceNumber': this.state.invoiceNumber,
+      'customer': this.state.customer,
+      'createdDate': this.state.createdDate,
+      'dueDate': this.state.dueDate,
+      'totalDue': this.state.totalDue,
+
+      'itemCode': this.state.itemCode,
+      'description': this.state.description,
+      'quantity': this.state.quantity,
+      'unitPrice': this.state.unitPrice,
+      'totalPrice': this.state.totalPrice,
+    }
+    var options = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(infoToBePDFed)
+    }
+    fetch(`http://localhost:8000/api/invoicePDF/${document.cookie.split(';')[0].split('=')[1]}`, options).then(
+      response => {
+        response.blob().then(blob => {
+          let url = window.URL.createObjectURL(blob)
+          let a = document.createElement('a')
+          a.href = url
+          a.download = this.state.invoiceNumber
+          a.click()
+        })
+      }
+    )
+  }
+
 
 
   render() {
@@ -315,7 +350,7 @@ class InvoiceTable extends Component {
           <div id='quote-information'>
             <label style={{'margin-left':'15px'}}>Invoice Number</label><input value={this.state.invoiceNumber} onChange={e => {this.setState({invoiceNumber:e.target.value})}} placeholder='Quote Number' type='text' style={{'margin-left':'18px'}}/>
             <label style={{'margin-left':'20px'}}>Customer</label><input type='text' value={this.state.customer} onChange={e => {this.setState({customer:e.target.value})}} placeholder='Customer' style={{'margin-left':'19px'}}/>
-            <label style={{'margin-left':'20px'}}>Total</label><input type='text' value={this.state.totalDue} disabled onChange={e => {this.setState({totalPrice:e.target.totalDue})}} placeholder='Total' style={{'margin-left':'20px'}}/><br></br>
+            <label style={{'margin-left':'20px'}}>Total</label><input type='text' value={this.state.totalDue} onChange={e => {this.setState({totalDue:e.target.value})}} placeholder='Total' style={{'margin-left':'20px'}}/><br></br>
             <label style={{'margin-left':'15px'}}>Created Date</label><input type='text' disabled value={this.state.createdDate} placeholder='dd/mm//yyyy'  style={{'margin-left':'44px'}}/>
             <label style={{'margin-left':'20px'}}>Due Date</label><input value={this.state.dueDate} onChange={e => {this.setState({dueDate:e.target.value})}} placeholder='dd/mm//yyyy' type='text' style={{'margin-left':'20px'}}/>
             <label style={{'margin-left':'20px'}}>Status</label>
@@ -359,13 +394,10 @@ class InvoiceTable extends Component {
           </div>
 
           <div id='pdf-email'>
-            <button style={{'border-right':'2px solid black'}}>Export To PDF</button>
+            <button style={{'border-right':'2px solid black'}} onClick={this.exportToPDF}>Export To PDF</button>
             <button>Email Invoice</button>
           </div>
         </div>
-
-
-
 
       </>
     )

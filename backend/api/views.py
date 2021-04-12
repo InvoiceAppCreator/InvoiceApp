@@ -7,10 +7,16 @@ from rest_framework.decorators import api_view
 from django.core.files.storage import FileSystemStorage
 import os
 import pandas as pd
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import Paragraph, Table, TableStyle
+from django.http import HttpResponse, HttpResponseNotFound
+import io
+from django.http import FileResponse
 
 CURR_DIR = os.getcwd()
 
-# Create your views here.
 class Users(APIView):
     def get_query(self):
         userData = User.objects.all()
@@ -416,3 +422,163 @@ def uploadFileInvoice(request, username):
             status=status
         )
         return Response({'Imported': 'Success'})
+
+@api_view(['POST'])
+def quotePDF(request, username):
+    if request.method == 'POST':
+        info = request.data
+
+        quoteNumber = info['quoteNumber']
+        customer = info['customer']
+        total = info['total']
+        createdDate = info['createdDate']
+        salesperson = info['salesperson']
+        expectedDate = info['expectedDate']
+        company = info['company']
+
+        modelNumber = info['modelNumber']
+        partNumber = info['partNumber']
+        description = info['description']
+        cost = info['cost']
+        price = info['price']
+        onHand = info['onHand']
+        comitted = info['comitted']
+
+        header_info = ['Model #', 'Part #', 'Desc.', 'Cost', 'Price', 'Hand', 'Committed']
+        data = []
+        for x in range(len(modelNumber)):
+            dataToBeAppended = [modelNumber[x], partNumber[x], Paragraph(description[x]), cost[x], price[x], onHand[x], comitted[x]]
+            data.append(dataToBeAppended)
+        data.append(header_info)
+
+        fileName = CURR_DIR + '/api/PDFs/' + quoteNumber + '.pdf'
+
+        pdf = canvas.Canvas(fileName, bottomup=False, pagesize=A4)
+        pdf.drawImage(CURR_DIR+'/api/header.jpeg', 7,9,580,70)
+        pdf.setFillColorRGB(255,255,255)
+        pdf.setFont("Courier-Bold", 36)
+        pdf.drawString(30,54, quoteNumber)
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier-Bold', 20)
+        pdf.drawString(30,120, "Customer: ")
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier', 20)
+        pdf.drawString(200,120, customer)
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier-Bold', 20)
+        pdf.drawString(30,150, "Salesperson")
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier', 20)
+        pdf.drawString(200,150, salesperson)
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier-Bold', 20)
+        pdf.drawString(30,180, "Company: ")
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier', 20)
+        pdf.drawString(200,180, company)
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier-Bold', 20)
+        pdf.drawString(30,240, "Total: ")
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier', 20)
+        pdf.drawString(120,240, '$'+total)
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier-Bold', 10)
+        pdf.drawString(30,265, "Created: ")
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier', 10)
+        pdf.drawString(80,265, createdDate)
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier-Bold', 10)
+        pdf.drawString(430,265, "Expected: ")
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier', 10)
+        pdf.drawString(490,265, expectedDate)
+        table = Table(data, colWidths=[60,60,150,60,60, 60, 80])
+        table.setStyle([
+				('FONTNAME', (0,-1), (-1,-1), 'Courier-Bold'),
+				('FONTSIZE', (0,-1), (-1,-1), 12),
+                ("BOTTOMPADDING", (0,0), (-1,-1), 10),
+                ("TOPPADDING", (0,0), (-1,-1), 10),
+                ('BACKGROUND', (0,-1), (-1,-1), colors.green),
+                ('TEXTCOLOR', (0,-1), (-1,-1), colors.white),
+                ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+                ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+        ])
+        table.wrapOn(pdf, 0, 0)
+        table.drawOn(pdf, 30, 270)
+        pdf.showPage()
+        pdf.save()
+        return FileResponse(open(fileName, 'rb'))
+
+@api_view(['POST'])
+def invoicePDF(request, username):
+    if request.method == 'POST':
+        info = request.data
+
+        invoiceNumber = info['invoiceNumber']
+        customer = info['customer']
+        createdDate = info['createdDate']
+        dueDate = info['dueDate']
+        totalDue = info['totalDue']
+
+        itemCode = info['itemCode']
+        description = info['description']
+        quantity = info['quantity']
+        unitPrice = info['unitPrice']
+        totalPrice = info['totalPrice']
+
+        header_info = ['Item Code', 'Desc.', 'Quantity', 'Unit Price', 'Total Price']
+        data = []
+
+        for x in range(len(itemCode)):
+            dataToBeAppended = [itemCode[x], Paragraph(description[x]), quantity[x], unitPrice[x], totalPrice[x]]
+            data.append(dataToBeAppended)
+        data.append(header_info)
+
+        fileName = CURR_DIR + '/api/PDFs/' + invoiceNumber + '.pdf'
+        pdf = canvas.Canvas(fileName, bottomup=False, pagesize=A4)
+        pdf.drawImage(CURR_DIR+'/api/header.jpeg', 7,9,580,70)
+        pdf.setFillColorRGB(255,255,255)
+        pdf.setFont("Courier-Bold", 36)
+        pdf.drawString(30,54, invoiceNumber)
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier-Bold', 20)
+        pdf.drawString(30,120, "Customer: ")
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier', 20)
+        pdf.drawString(200,120, customer)
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier-Bold', 20)
+        pdf.drawString(30,150, "Due Date: ")
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier', 20)
+        pdf.drawString(200,150, dueDate)
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier-Bold', 40)
+        pdf.drawString(30,220, "Total: ")
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier', 35)
+        pdf.drawString(190,220, '$'+ totalDue)
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier-Bold', 10)
+        pdf.drawString(40,265, "Created: ")
+        pdf.setFillColorRGB(0,0,0)
+        pdf.setFont('Courier', 10)
+        pdf.drawString(90,265, createdDate)
+        table = Table(data, colWidths=[90,160,90,90,90])
+        table.setStyle([
+				('FONTNAME', (0,-1), (-1,-1), 'Courier-Bold'),
+				('FONTSIZE', (0,-1), (-1,-1), 12),
+                ("BOTTOMPADDING", (0,0), (-1,-1), 10),
+                ("TOPPADDING", (0,0), (-1,-1), 10),
+                ('BACKGROUND', (0,-1), (-1,-1), colors.green),
+                ('TEXTCOLOR', (0,-1), (-1,-1), colors.white),
+                ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+                ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+        ])
+        table.wrapOn(pdf, 0, 0)
+        table.drawOn(pdf, 30, 270)
+        pdf.showPage()
+        pdf.save()
+        return FileResponse(open(fileName, 'rb'))

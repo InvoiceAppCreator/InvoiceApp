@@ -10,5 +10,7 @@ urlpatterns = [
     path('parts/<username>', views.Parts),
     path('part-search/<username>', views.partSearch),
     path('uploadFile/<username>', views.uploadFile),
-    path('uploadFileInvoice/<username>', views.uploadFileInvoice)
+    path('uploadFileInvoice/<username>', views.uploadFileInvoice),
+    path('quotePDF/<username>', views.quotePDF),
+    path('invoicePDF/<username>', views.invoicePDF),
 ]

@@ -17,7 +17,7 @@ class ConvertToInvoice extends Component {
       createdDate: `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
       expectedDate: '',
       total: 0.00,
-      status: false,
+      status: '',
 
       itemCode : [],
       description: [],
@@ -57,6 +57,7 @@ class ConvertToInvoice extends Component {
           partData: [],
           total: 0,
           customer: '',
+          status: 'Pending',
         })
         if (this.state.quoteNumber === '') {
 
@@ -84,7 +85,8 @@ class ConvertToInvoice extends Component {
                   this.setState({
                     partID: this.state.partID + 1,
                     total : this.state.total + this.state.totalPrice[this.state.partID],
-                    customer : x.customer
+                    customer : x.customer,
+                    status: x.status
                   })
                 }
               }
@@ -119,7 +121,7 @@ class ConvertToInvoice extends Component {
       'createdDate': this.state.createdDate,
       'dueDate': this.state.expectedDate,
       'totalDue': this.state.total,
-      'status': false
+      'status': this.state.status,
     }
 
     axios.post(`http://localhost:8000/api/invoiceList/${document.cookie.split(';')[0].split('=')[1]}`, invoiceData).then(res => {
@@ -144,8 +146,8 @@ class ConvertToInvoice extends Component {
           <label style={{'margin-left':'20px'}}>Total<input style={{'margin-left':'53.5px'}} type='text' placeholder='Total of All Parts' value={this.state.total.toFixed(2)} disabled/></label><br></br>
           <label>Status
             <select style={{'margin-left':'85px'}} value={this.state.status} onChange={e => {this.setState({status: e.target.value})}}>
-              <option value={0}>Pending</option>
-              <option value={1}>Paid</option>
+              <option value={'Pending'}>Pending</option>
+              <option value={'Paid'}>Paid</option>
             </select>
           </label>
         </div>

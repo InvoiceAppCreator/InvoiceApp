@@ -297,12 +297,52 @@ class QuotesTable extends Component {
 
   }
 
-
-
   handleUpload = (event) => {
     this.setState({
       file: event.target.files[0]
     })
+  }
+
+  exportToPDF = (event) => {
+
+    var infoToBePDFed = {
+      'quoteNumber': this.state.quoteNumber,
+      'customer': this.state.customer,
+      'total': this.state.total,
+      'createdDate': this.state.createdDate,
+      'salesperson': this.state.salesperson,
+      'expectedDate': this.state.expectedDate,
+      'company': this.state.company,
+
+      'modelNumber': this.state.modelNumber,
+      'partNumber': this.state.partNumber,
+      'description': this.state.description,
+      'cost': this.state.cost,
+      'price': this.state.price,
+      'onHand': this.state.onHand,
+      'comitted': this.state.comitted,
+    }
+    
+    var options = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(infoToBePDFed)
+    }
+    fetch(`http://localhost:8000/api/quotePDF/${document.cookie.split(';')[0].split('=')[1]}`, options).then(
+      response => {
+        response.blob().then(blob => {
+          let url = window.URL.createObjectURL(blob)
+          let a = document.createElement('a')
+          a.href = url
+          a.download = this.state.quoteNumber
+          a.click()
+        })
+      }
+    )
+
   }
 
   render() {
@@ -421,7 +461,7 @@ class QuotesTable extends Component {
           </div>
 
           <div id='pdf-email'>
-            <button style={{'border-right':'2px solid black'}}>Export To PDF</button>
+            <button style={{'border-right':'2px solid black'}} onClick={this.exportToPDF}>Export To PDF</button>
             <button>Email Quote</button>
           </div>
         </div>
