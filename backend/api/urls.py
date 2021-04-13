@@ -13,4 +13,5 @@ urlpatterns = [
     path('uploadFileInvoice/<username>', views.uploadFileInvoice),
     path('quotePDF/<username>', views.quotePDF),
     path('invoicePDF/<username>', views.invoicePDF),
+    path('email/<username>', views.emailPDF),
 ]

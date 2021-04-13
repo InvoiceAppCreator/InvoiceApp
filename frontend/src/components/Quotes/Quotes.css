@@ -372,3 +372,73 @@ body {
 #importing-page button:hover {
   background-color: #94ad2e
 }
+
+#email-page {
+  position: absolute;
+  background-color:  #30a309;
+  color: white;
+  padding: 1%;
+  margin-left: 28%;
+  margin-top: 5%;
+  width: 40%;
+  z-index: 1;
+  border: 2px solid black;
+}
+
+#email-page input {
+  text-align: center;
+}
+
+#email-page textarea {
+  width: 96%;
+  height: 90px;
+  padding: 2%;
+  max-width: 96%;
+  max-height: 90px;
+  font-size: 16px;
+}
+
+#recipients {
+  width: 96%;
+  padding: 2%;
+  font-size: 16px;
+  border-radius: 0px 20px 20px 20px;
+  border: none;
+}
+
+#email-page button {
+  width: 50%;
+  padding: 2%;
+  background-color: #08491f;
+  border: none;
+  color: white;
+}
+
+#email-page button:hover {
+  background-color: #94ad2e
+}
+
+#email-page label {
+  font-size: 20px;
+}
+
+#time {
+  margin-left: 12px;
+  width: 40%;
+  padding: 0.8%;
+  font-size: 14px;
+  border-radius: 20px 20px 20px 20px;
+  border: none;
+}
+
+.gif-loader {
+  position: absolute;
+  margin-top: 15%;
+  margin-left: 46%;
+
+}
+
+.gif-loader img {
+  width: 100px;
+  height: 100px;
+}

@@ -14,7 +14,7 @@ function SignupBody() {
 
 
   function submitDataToDB(event) {
-    if (password === [confirm_password] && password.length > 0 && confirm_password.length > 0) {
+    if (password === confirm_password && password.length > 0 && confirm_password.length > 0) {
       var data = {
         login: false,
         firstName: firstName,
@@ -25,7 +25,6 @@ function SignupBody() {
       }
       document.cookie=`username=${username}`
       axios.post('http://localhost:8000/api/users/', data).then(res => {
-        console.log(res);
         window.location.href = 'http://localhost:3000/home/'
       })
 

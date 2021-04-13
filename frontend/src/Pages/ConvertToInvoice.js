@@ -17,7 +17,7 @@ class ConvertToInvoice extends Component {
       createdDate: `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
       expectedDate: '',
       total: 0.00,
-      status: '',
+      status: 'Pending',
 
       itemCode : [],
       description: [],
@@ -86,7 +86,6 @@ class ConvertToInvoice extends Component {
                     partID: this.state.partID + 1,
                     total : this.state.total + this.state.totalPrice[this.state.partID],
                     customer : x.customer,
-                    status: x.status
                   })
                 }
               }

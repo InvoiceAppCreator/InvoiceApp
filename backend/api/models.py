@@ -64,6 +64,15 @@ class invoicePart(models.Model):
 class FileInformation(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     fileName = models.CharField(max_length=100)
-    fileData = models.FileField(upload_to='media')
+    fileData = models.FileField(upload_to='media/excel')
     def __str__(self):
         return self.fileName
+
+class EmailInfo(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    PDF = models.FileField(upload_to='media/pdf/')
+    reciepients = models.CharField(max_length=100)
+    message = models.CharField(max_length=500)
+    now = models.BooleanField()
+    later = models.CharField(max_length=100)
+    subject = models.CharField(max_length=100)

@@ -2,7 +2,8 @@ import React, {Component} from 'react'
 import TableTemplate from './TableTemplate'
 import './Quotes.css'
 import image from '../Home/Images/SunBackground.jpg'
-import image2 from './Images/sampleFace2.png'
+import image2 from './Images/sampleFace4.png'
+import loader from './Images/loading2.gif'
 import axios from 'axios'
 import EditTable from './EditTable'
 
@@ -17,6 +18,8 @@ class QuotesTable extends Component {
       quoteID: 0,
 
       display2: 'none',
+      display3: 'none',
+      display4: 'none',
 
       quoteNumberOriginal: '',
       quoteNumber: '',
@@ -52,6 +55,13 @@ class QuotesTable extends Component {
       partData: [],
 
       file: null,
+
+      recipients: '',
+      message: '',
+      pdfFile: null,
+      nowOrLater : '',
+      timeToSend: '',
+      subject: ''
     }
   }
 
@@ -133,6 +143,7 @@ class QuotesTable extends Component {
       display: 'none',
       opacity: '1',
       display2: 'none',
+      display3: 'none',
 
       databaseID: [],
       modelNumber: [],
@@ -322,7 +333,7 @@ class QuotesTable extends Component {
       'onHand': this.state.onHand,
       'comitted': this.state.comitted,
     }
-    
+
     var options = {
       method: 'POST',
       headers: {
@@ -343,6 +354,33 @@ class QuotesTable extends Component {
       }
     )
 
+  }
+
+  emailQuote = (event) => {
+    this.setState({
+      display: 'none',
+      display2: 'none',
+      display3: 'block',
+    })
+  }
+
+  sendEmail = (event) => {
+    const formData = new FormData()
+    formData.append('filePDF', this.state.pdfFile)
+    formData.append('recipients', this.state.recipients)
+    formData.append('message', this.state.message)
+    formData.append('subject', this.state.subject)
+    formData.append('nowOrLater', this.state.nowOrLater)
+    formData.append('timeToSend', this.state.timeToSend)
+
+    this.setState({
+      display3: 'none',
+      display4: 'block'
+    })
+
+    axios.post(`http://localhost:8000/api/email/${document.cookie.split(';')[0].split('=')[1]}`, formData).then(res => {
+      window.location.href = 'http://localhost:3000/quotes'
+    })
   }
 
   render() {
@@ -370,6 +408,29 @@ class QuotesTable extends Component {
           <input type='file' accept='.xlsx' onChange={this.handleUpload}/><br></br>
           <button onClick={this.submitFile}>Import File</button>
           <button onClick={this.cancelEdit}>Cancel</button>
+        </div>
+
+        <div id='email-page' style={{display:this.state.display3}}>
+          <label>To: </label><input id='recipients' placeholder='Recipients' value={this.state.recipients} onChange={e => this.setState({recipients:e.target.value})} type='text'/><br></br>
+          <label>Subject</label><br></br>
+          <input id='recipients' type='text' placeholder='Subject' value={this.state.subject} onChange={e => this.setState({subject:e.target.value})}/>
+          <hr></hr>
+          <label>Message</label><br></br>
+          <textarea placeholder='Type Message...' value={this.state.message} onChange={e => this.setState({message: e.target.value})}></textarea>
+          <hr></hr>
+          <label>PDF</label><input accept='.pdf' type='file' onChange={e => this.setState({pdfFile:e.target.files[0]})}/><br></br>
+          <hr></hr>
+          <label>Send</label><br></br>
+          <input type='radio' id='now' value='now' name='timeToSend' onChange={e => this.setState({nowOrLater:e.target.value})}/>Now<br></br>
+          <input type='radio' id='later' value='later' name='timeToSend' onChange={e => this.setState({nowOrLater:e.target.value})}/>Later
+          <input type='text' placeholder='DD/MM/YYYY HH:MM AM/PM' id='time' value={this.state.timeToSend} onChange={e => this.setState({timeToSend:e.target.value})}/><br></br>
+          <hr></hr>
+          <button onClick={this.sendEmail}>Send</button>
+          <button onClick={this.cancelEdit}>Cancel</button>
+        </div>
+
+        <div className='gif-loader' style={{display:this.state.display4}}>
+          <img src={loader} alt=''/>
         </div>
 
         <div className='quotes-quotesTable' style={{'opacity':this.state.opacity}}>
@@ -462,7 +523,7 @@ class QuotesTable extends Component {
 
           <div id='pdf-email'>
             <button style={{'border-right':'2px solid black'}} onClick={this.exportToPDF}>Export To PDF</button>
-            <button>Email Quote</button>
+            <button onClick={this.emailQuote}>Email Quote</button>
           </div>
         </div>
       </>

@@ -2,18 +2,21 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import UserSerializer, InvoiceListSerializer, QuoteListSerializer, PartSerializer, invoicePartSerializer, FileInformationSerializer
-from .models import User, InvoiceList, QuoteList, Part, invoicePart, FileInformation
+from .models import User, InvoiceList, QuoteList, Part, invoicePart, FileInformation, EmailInfo
 from rest_framework.decorators import api_view
 from django.core.files.storage import FileSystemStorage
-import os
-import pandas as pd
+from django.http import FileResponse
+from email.message import EmailMessage
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Paragraph, Table, TableStyle
 from django.http import HttpResponse, HttpResponseNotFound
 import io
-from django.http import FileResponse
+import os
+import pandas as pd
+import datetime
+import smtplib
 
 CURR_DIR = os.getcwd()
 
@@ -582,3 +585,40 @@ def invoicePDF(request, username):
         pdf.showPage()
         pdf.save()
         return FileResponse(open(fileName, 'rb'))
+
+@api_view(['POST'])
+def emailPDF(request, username):
+    if request.method == 'POST':
+        data = request.data
+        author = User.objects.get(username=username)
+        if request.data['nowOrLater'] == 'now':
+            email = 'nelsonfite5@gmail.com'
+            password = 'pYIoJRtEyZ'
+
+            contactsArray = []
+            contacts = request.data['recipients'].split(' ')
+
+            for contact in contacts:
+                contactsArray.append(contact)
+
+            msg = EmailMessage()
+            msg['Subject'] = request.data['subject']
+            msg['From'] = email
+            msg['To'] = contactsArray
+            msg.set_content(request.data['message'])
+
+            uploaded_file = request.FILES['filePDF']
+            fs = FileSystemStorage()
+            name = fs.save(uploaded_file.name, uploaded_file)
+            url = fs.url(name)
+
+            with open(CURR_DIR + url, 'rb') as f:
+                file_data = f.read()
+                file_name = request.FILES['filePDF'].name
+                msg.add_attachment(file_data, maintype='application', subtype='octet-stream', filename=file_name)
+
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                smtp.login(email, password)
+                smtp.send_message(msg)
+
+            return Response("PDF Sent")

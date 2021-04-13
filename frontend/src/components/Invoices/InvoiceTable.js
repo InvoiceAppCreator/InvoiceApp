@@ -3,7 +3,8 @@ import './Invoices.css'
 import axios from 'axios'
 import TableTemplate from './TableTemplate'
 import image from '../Home/Images/SunBackground.jpg'
-import image2 from '../Quotes/Images/sampleFace2.png'
+import image2 from '../Quotes/Images/sampleFace4.png'
+import loader from '../Quotes/Images/loading2.gif'
 import EditTable from './EditTable'
 
 class InvoiceTable extends Component {
@@ -18,6 +19,8 @@ class InvoiceTable extends Component {
       invoiceNumberOriginal: '',
 
       display2: 'none',
+      display3: 'none',
+      display4: 'none',
 
       invoiceNumber: '',
       customer: '',
@@ -114,6 +117,7 @@ class InvoiceTable extends Component {
       opacity: '1',
       display: 'none',
       display2: 'none',
+      display3: 'none',
 
       databaseID: [],
       itemCode: [],
@@ -281,6 +285,35 @@ class InvoiceTable extends Component {
     )
   }
 
+  emailInvoice = (event) => {
+    this.setState({
+      display: 'none',
+      display2: 'none',
+      display3: 'block',
+    })
+  }
+
+  sendEmail = (event) => {
+    const formData = new FormData()
+    formData.append('filePDF', this.state.pdfFile)
+    formData.append('recipients', this.state.recipients)
+    formData.append('message', this.state.message)
+    formData.append('subject', this.state.subject)
+    formData.append('nowOrLater', this.state.nowOrLater)
+    formData.append('timeToSend', this.state.timeToSend)
+
+    this.setState({
+      display3: 'none',
+      display4: 'block'
+    })
+
+    axios.post(`http://localhost:8000/api/email/${document.cookie.split(';')[0].split('=')[1]}`, formData).then(res => {
+      window.location.href = 'http://localhost:3000/invoices'
+    })
+  }
+
+
+
 
 
   render() {
@@ -345,6 +378,28 @@ class InvoiceTable extends Component {
           <button onClick={this.cancelEdit}>Cancel</button>
         </div>
 
+        <div id='email-page' style={{display:this.state.display3}}>
+          <label>To: </label><input id='recipients' placeholder='Recipients' value={this.state.recipients} onChange={e => this.setState({recipients:e.target.value})} type='text'/><br></br>
+          <label>Subject</label><br></br>
+          <input id='recipients' type='text' placeholder='Subject' value={this.state.subject} onChange={e => this.setState({subject:e.target.value})}/>
+          <hr></hr>
+          <label>Message</label><br></br>
+          <textarea placeholder='Type Message...' value={this.state.message} onChange={e => this.setState({message: e.target.value})}></textarea>
+          <hr></hr>
+          <label>PDF</label><input accept='.pdf' type='file' onChange={e => this.setState({pdfFile:e.target.files[0]})}/><br></br>
+          <hr></hr>
+          <label>Send</label><br></br>
+          <input type='radio' id='now' value='now' name='timeToSend' onChange={e => this.setState({nowOrLater:e.target.value})}/>Now<br></br>
+          <input type='radio' id='later' value='later' name='timeToSend' onChange={e => this.setState({nowOrLater:e.target.value})}/>Later
+          <input type='text' placeholder='DD/MM/YYYY HH:MM AM/PM' id='time' value={this.state.timeToSend} onChange={e => this.setState({timeToSend:e.target.value})}/><br></br>
+          <hr></hr>
+          <button onClick={this.sendEmail}>Send</button>
+          <button onClick={this.cancelEdit}>Cancel</button>
+        </div>
+
+        <div className='gif-loader' style={{display:this.state.display4}}>
+          <img src={loader} alt=''/>
+        </div>
 
         <div className='edit-delete-add-invoice' style={{'display':this.state.display}}>
           <div id='quote-information'>
@@ -395,7 +450,7 @@ class InvoiceTable extends Component {
 
           <div id='pdf-email'>
             <button style={{'border-right':'2px solid black'}} onClick={this.exportToPDF}>Export To PDF</button>
-            <button>Email Invoice</button>
+            <button onClick={this.emailInvoice}>Email Invoice</button>
           </div>
         </div>
 
