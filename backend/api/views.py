@@ -592,8 +592,8 @@ def emailPDF(request, username):
         data = request.data
         author = User.objects.get(username=username)
         if request.data['nowOrLater'] == 'now':
-            email = 'nelsonfite5@gmail.com'
-            password = 'pYIoJRtEyZ'
+            email = 'xxx'
+            password = 'xxx'
 
             contactsArray = []
             contacts = request.data['recipients'].split(' ')
