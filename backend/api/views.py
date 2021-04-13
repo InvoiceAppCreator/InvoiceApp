@@ -622,3 +622,20 @@ def emailPDF(request, username):
                 smtp.send_message(msg)
 
             return Response("PDF Sent")
+        elif request.data['nowOrLater'] == 'later':
+            uploaded_file = request.FILES['filePDF']
+            fs = FileSystemStorage()
+            name = fs.save(uploaded_file.name, uploaded_file)
+            url = fs.url(name)
+            EmailInfo.objects.create(
+                author=author,
+                PDF=url,
+                recipients=request.data['recipients'],
+                message=request.data['message'],
+                now=False,
+                later=request.data['nowOrLater'],
+                subject=request.data['subject'],
+                fileName=request.FILES['filePDF'].name,
+                date=request.data['timeToSend']
+            )
+            return Response({'message':'Great'})

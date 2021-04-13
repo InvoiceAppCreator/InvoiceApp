@@ -71,8 +71,12 @@ class FileInformation(models.Model):
 class EmailInfo(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     PDF = models.FileField(upload_to='media/pdf/')
-    reciepients = models.CharField(max_length=100)
+    recipients = models.CharField(max_length=100)
     message = models.CharField(max_length=500)
     now = models.BooleanField()
     later = models.CharField(max_length=100)
     subject = models.CharField(max_length=100)
+    fileName = models.CharField(max_length=100, default='')
+    date = models.CharField(max_length=100, default='')
+    def __str__(self):
+        return self.fileName

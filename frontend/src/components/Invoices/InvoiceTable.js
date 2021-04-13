@@ -3,7 +3,7 @@ import './Invoices.css'
 import axios from 'axios'
 import TableTemplate from './TableTemplate'
 import image from '../Home/Images/SunBackground.jpg'
-import image2 from '../Quotes/Images/sampleFace4.png'
+import image2 from '../Quotes/Images/sampleFace2.png'
 import loader from '../Quotes/Images/loading2.gif'
 import EditTable from './EditTable'
 
