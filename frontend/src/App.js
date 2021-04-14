@@ -8,6 +8,7 @@ import Invoices from './Pages/Invoices'
 import CreateQuote from './Pages/CreateQuote'
 import ConvertToInvoice from './Pages/ConvertToInvoice'
 import CreateInvoice from './Pages/CreateInvoice'
+import logout from './components/Logout/logout'
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
         <Route path='/quotes/convert-to-invoice' exact component={ConvertToInvoice}/>
         <Route path='/invoices' exact component={Invoices}/>
         <Route path='/invoices/create-invoice' exact component={CreateInvoice}/>
+        <Route path='/logout' exact component={logout}/>
       </Router>
     </div>
   );

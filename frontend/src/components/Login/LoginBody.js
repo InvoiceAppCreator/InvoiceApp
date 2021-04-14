@@ -29,13 +29,13 @@ function LoginBody() {
 
   return (
       <div className='login-main-body'>
-        <div>
+        <form onSubmit={submitLogintoDB}>
           <label>Username</label><br></br>
           <input type='text' value={username} onChange={e => setUsername(e.target.value)} /><br></br>
           <label id='login-password'>Password</label><br></br>
           <input type='password' value={password} onChange={e => setPassword(e.target.value)}/><br></br>
-          <button onClick={submitLogintoDB}>Login</button>
-        </div>
+          <button>Login</button>
+        </form>
         <Link to='/signup'><p>Signup</p></Link>
       </div>
   )

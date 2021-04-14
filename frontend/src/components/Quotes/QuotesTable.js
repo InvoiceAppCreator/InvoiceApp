@@ -16,10 +16,18 @@ class QuotesTable extends Component {
       display: 'none',
       opacity: '1',
       quoteID: 0,
+      filterArray: false,
+      uniqueData: [],
+      filteredData: [],
 
       display2: 'none',
       display3: 'none',
       display4: 'none',
+      display5: 'none',
+      display5_1: true,
+      display5_2: '1',
+
+      databaseSearch: '',
 
       quoteNumberOriginal: '',
       quoteNumber: '',
@@ -383,16 +391,62 @@ class QuotesTable extends Component {
     })
   }
 
+  showSearch = (event) => {
+    this.setState({
+      display5_2: '0.3',
+      display5: 'block',
+    })
+
+    // const inputSearch = document.getElementById('database_search')
+
+    if (this.state.display5_1 === true) {
+      this.setState({
+        display5_1: false,
+        display5_2: '0.3',
+        display5: 'block',
+      })
+    } else if (this.state.display5_1 === false) {
+      this.setState({
+        display5_1: true,
+        display5_2: '1',
+        display5: 'none',
+      })
+    }
+  }
+
+  search = (event) => {this.setState({databaseSearch: event.target.value}, () => {
+      if (event.target.value !== '') {
+        this.setState({filterArray:true})
+        this.state.data.filter(x => {
+          if (x.quoteNumber.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.createdDate.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.expectedDate.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.customer.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.salesperson.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.company.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.total.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.status.toLowerCase().includes(event.target.value.toLowerCase())) {
+            this.state.uniqueData.push(x)
+          }
+        })
+      } else if (event.target.value === '') {
+        this.setState  ({filterArray:false})
+      }
+      this.state.filteredData = this.state.uniqueData
+      this.state.uniqueData = []
+    })
+  }
+
   render() {
     return (
       <>
-        <div className='quotes-user' style={{'opacity':this.state.opacity}}>
+        <div className='quotes-user' style={{'opacity':this.state.opacity}} style={{'opacity':this.state.display5_2}}>
           <img src={image2} alt=''/>
           <hr id='user-line'></hr>
           <p>{document.cookie.split(';')[0].split('=')[1]}</p>
           <p>{`${document.cookie.split(';')[0].split('=')[1]}@gmail.com`}</p>
         </div>
-        <div className='quotes-buttons' style={{'opacity':this.state.opacity}}>
+        <div className='quotes-buttons' style={{'opacity':this.state.opacity}} style={{'opacity':this.state.display5_2}}>
           <div id='quotes-buttons-background-image'>
             <img src={image} alt=''/>
           </div>
@@ -401,6 +455,10 @@ class QuotesTable extends Component {
             <button onClick={this.convertToInvoice} >To Invoice</button>
             <button id='quotes-button-functions-buttons-import' onClick={this.importScreen}>Import</button>
           </div>
+        </div>
+
+        <div id='search-field' style={{display:this.state.display5}}>
+          <input id='database_search' autofocus type='text' value={this.state.databaseSearch} onChange={this.search} placeholder='Database Search'/>
         </div>
 
         <div id='importing-page' style={{display:this.state.display2}}>
@@ -452,7 +510,7 @@ class QuotesTable extends Component {
             <div id='quotesTable-table-table'>
               <table>
               {
-                this.state.data.map(info => <TableTemplate quoteNumber={info.quoteNumber}
+                this.state.filterArray ? this.state.filteredData.map(info => <TableTemplate quoteNumber={info.quoteNumber}
                                                           createdDate={info.createdDate}
                                                           expectedDate={info.expectedDate}
                                                           customer={info.customer}
@@ -461,13 +519,22 @@ class QuotesTable extends Component {
                                                           total={info.total}
                                                           status={info.status}
                                                           myFunction={this.sendIDtoEditPage}
-                                                          id={info.id}/>)
+                                                          id={info.id}/>) : this.state.data.map(info => <TableTemplate quoteNumber={info.quoteNumber}
+                                                                                                    createdDate={info.createdDate}
+                                                                                                    expectedDate={info.expectedDate}
+                                                                                                    customer={info.customer}
+                                                                                                    salesperson={info.salesperson}
+                                                                                                    company={info.company}
+                                                                                                    total={info.total}
+                                                                                                    status={info.status}
+                                                                                                    myFunction={this.sendIDtoEditPage}
+                                                                                                    id={info.id}/>)
               }
               </table>
             </div>
           </div>
           <div id='quotesTable-buttons' style={{'opacity':this.state.opacity}}>
-            <button id='quotesTable-buttons-search'>Search</button>
+            <button id='quotesTable-buttons-search' onClick={this.showSearch}>{this.state.display5_1 ? "Search" : "Cancel"}</button>
           </div>
         </div>
 

@@ -134,6 +134,9 @@ class ConvertToInvoice extends Component {
       <>
         <nav className='quotes-nav'>
             <h1 id='nav-header'>Convert to Invoice</h1>
+            <div style={{'margin-left':'55%'}}  id='nav-nav'>
+              <p><a href='/quotes'>Quotes&nbsp;</a> <a>|&nbsp;</a> <a href='/invoices'>Invoices&nbsp;</a> <a>|&nbsp;</a> <a href='/home'>Home&nbsp;</a> <a>|&nbsp;</a> <a>Settings&nbsp;</a> <a>|&nbsp;</a> <a href='/logout'>Logout&nbsp;</a></p>
+            </div>
         </nav>
 
         <div className='main-information-fill'>
