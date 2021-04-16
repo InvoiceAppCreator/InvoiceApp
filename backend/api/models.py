@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class User(models.Model):
     firstName = models.CharField(max_length=100)
     lastName = models.CharField(max_length=100)
@@ -22,7 +21,6 @@ class InvoiceList(models.Model):
     def __str__(self):
         return self.invoiceNumber
 
-
 class QuoteList(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     quoteNumber = models.CharField(max_length=100)
@@ -36,7 +34,6 @@ class QuoteList(models.Model):
     def __str__(self):
         return self.quoteNumber
 
-# Quote NUmber as well to link the parts to the quotelist, groupcode list the parts with each other
 class Part(models.Model):
     partQuoteNumber = models.CharField(max_length=100)
     author = models.ForeignKey(User, on_delete=models.CASCADE)

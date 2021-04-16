@@ -23,8 +23,8 @@ function SignupBody() {
         email: email,
         password: sha256(confirm_password).toString()
       }
-      document.cookie=`username=${username}`
       axios.post('http://localhost:8000/api/users/', data).then(res => {
+        document.cookie=`username=${username}&token=${res.data['TOKEN']}&firstName=${firstName}&lastName=${lastName}&email=${email}`
         window.location.href = 'http://localhost:3000/home/'
       })
 

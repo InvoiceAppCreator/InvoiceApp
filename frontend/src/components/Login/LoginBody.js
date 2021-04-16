@@ -17,9 +17,9 @@ function LoginBody() {
     axios.post('http://localhost:8000/api/users/', data).then(res => {
       var userData = res.data
       if (userData['message'] === 'Success') {
-        //setCookie('username', username, {path:'/'})
-        document.cookie=`username=${username}`
+        document.cookie=`username=${username}&token=${userData['TOKEN']}&firstName=${userData['firstName']}&lastName=${userData['lastName']}&email=${userData['email']}`
         window.location.href = 'http://localhost:3000/home/'
+        console.log(document.cookie)
       } else if (userData['message'] === 'Wrong') {
           alert('Incorrect Login')
       }

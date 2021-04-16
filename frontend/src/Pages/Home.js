@@ -7,7 +7,7 @@ function Home() {
   return (
     <>
       <Nav/>
-      <Welcome user={document.cookie.split(';')[0].split('=')[1]}/>
+      <Welcome user={`${document.cookie.split('&')[2].split('=')[1]} ${document.cookie.split('&')[3].split('=')[1]}`}/>
     </>
   )
 }

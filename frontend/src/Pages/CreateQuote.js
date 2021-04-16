@@ -8,11 +8,11 @@ class CreateQuote extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      quoteNumber: '',
+      quoteNumber: `Q-${Math.floor((Math.random() * 20000000) + 1)}`,
       customers: '',
       total: '',
       createdDate: `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
-      salesperson: '',
+      salesperson: `${document.cookie.split('&')[2].split('=')[1]} ${document.cookie.split('&')[3].split('=')[1]}`,
       expectedDate: '',
       company: '',
       status: 'Order',
@@ -29,7 +29,10 @@ class CreateQuote extends Component {
       partID : 1,
       partData : [<CreateQuoteTable partKey={0}/>],
 
-      savedData: []
+      savedData: [],
+
+      username: document.cookie.split('&')[0].split('=')[1],
+      token: document.cookie.split('&')[1].split('=')[1]
     }
   }
 
@@ -59,7 +62,7 @@ class CreateQuote extends Component {
 
         var info = {
           'partQuoteNumber' : this.state.quoteNumber,
-          'author': document.cookie.split(';')[0].split('=')[1],
+          'author': document.cookie.split('&')[0].split('=')[1],
           'partModelNumber' : this.state.modelNumber[i],
           'partNumber' : this.state.partNumber[i],
           'partDescription' : this.state.description[i],
@@ -68,13 +71,13 @@ class CreateQuote extends Component {
           'partQtyOnHand' : this.state.qtyOnHand[i],
           'partQtyCommitted' : this.state.qtyComitted[i]
         }
-        axios.post(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`, info).then(res => {
+        axios.post(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`, info).then(res => {
           console.log(res)
         })
       }
     }
     var quoteData = {
-      'author': document.cookie.split(';')[0].split('=')[1],
+      'author': document.cookie.split('&')[0].split('=')[1],
       'quoteNumber': this.state.quoteNumber,
       'customers': this.state.customers,
       'total': this.state.total,
@@ -84,7 +87,7 @@ class CreateQuote extends Component {
       'company': this.state.company,
       'status': this.state.status
     }
-    axios.post(`http://localhost:8000/api/quoteList/${document.cookie.split(';')[0].split('=')[1]}`, quoteData).then(res => {
+    axios.post(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`, quoteData).then(res => {
       console.log(res)
       window.location.href = 'http://localhost:3000/quotes/'
     })
@@ -118,7 +121,7 @@ class CreateQuote extends Component {
       </nav>
 
       <div className='main-information-fill'>
-        <label>Quote Number</label><input style={{'margin-left':'20px'}} type='text' value={this.state.quoteNumber} placeholder='Quote Number' onChange={e => {this.setState({quoteNumber:e.target.value})}}/>
+        <label>Quote Number</label><input style={{'margin-left':'20px'}} type='text' disabled value={this.state.quoteNumber} placeholder='Quote Number' onChange={e => {this.setState({quoteNumber:e.target.value})}}/>
         <label style={{'margin-left':'34px'}}>Customers</label><input style={{'margin-left':'34px'}} type='text' value={this.state.customers} placeholder='Customers' onChange={e => {this.setState({customers:e.target.value})}}/>
         <label style={{'margin-left':'34px'}}>Total</label><input type='text' style={{'margin-left':'34px'}} value={this.state.total} placeholder='Total Value' onChange={e => {this.setState({total:e.target.value})}}/><br></br>
         <label>Created Date</label><input type='text' style={{'margin-left':'34px'}} value={this.state.createdDate} placeholder='Today' onChange={e => {this.setState({createdDate:e.target.value})}} disabled/>

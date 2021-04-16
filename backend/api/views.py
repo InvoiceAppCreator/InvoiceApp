@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from .serializers import UserSerializer, InvoiceListSerializer, QuoteListSerializer, PartSerializer, invoicePartSerializer, FileInformationSerializer
 from .models import User, InvoiceList, QuoteList, Part, invoicePart, FileInformation, EmailInfo
 from rest_framework.decorators import api_view
@@ -17,56 +16,67 @@ import os
 import pandas as pd
 import datetime
 import smtplib
+import hashlib
+import json
+from . import TokenCheck
 
 CURR_DIR = os.getcwd()
 
-class Users(APIView):
-    def get_query(self):
-        userData = User.objects.all()
-        return userData
-    def get(self, request):
-        userData = self.get_query()
-        serializer = UserSerializer(userData, many=True)
-        return Response(serializer.data)
-    def post(self, request):
+@api_view(['POST'])
+def Users(request):
+    if request.method == "POST":
+        userData = request.data
         try:
-            userData = request.data
             if userData['login'] == True:
                 loginData = User.objects.get(username=userData['username'])
                 usernameCheck = loginData.username
                 passwordCheck = loginData.password
-
                 if usernameCheck == userData['username'] and passwordCheck == userData['password']:
-                    return Response({'message':'Success'})
+                    hashData = {
+                    'firstName':loginData.firstName,
+                    'lastName':loginData.lastName,
+                    'username':loginData.username,
+                    'email':loginData.email,
+                    'password':loginData.password,
+                    }
+                    hashData = json.dumps(hashData).encode('utf-8')
+                    token = hashlib.sha256(hashData).hexdigest()
+                    return Response({'message':'Success', 'TOKEN':token, 'username':loginData.username, 'firstName':loginData.firstName, 'lastName':loginData.lastName, 'email':loginData.email})
                 else:
                     return Response({'message':'Wrong'})
 
             elif userData['login'] == False:
-                addedData = User.objects.create(firstName=userData['firstName'],
-                                            lastName=userData['lastName'],
-                                            username=userData['username'],
-                                            email=userData['email'],
-                                            password=userData['password'])
-                addedData.save()
-                serializer = UserSerializer(addedData)
-                return Response(serializer.data)
-        except:
-            return Response({'message':'Wrong'})
+                User.objects.create(firstName=userData['firstName'],
+                                    lastName=userData['lastName'],
+                                    username=userData['username'],
+                                    email=userData['email'],
+                                    password=userData['password'])
+                hashData = {
+                    'firstName':userData['firstName'],
+                    'lastName':userData['lastName'],
+                    'username':userData['username'],
+                    'email':userData['email'],
+                    'password':userData['password'],
+                }
+                hashData = json.dumps(hashData).encode('utf-8')
+                token = hashlib.sha256(hashData).hexdigest()
+                return Response({'TOKEN':token})
+        except Exception as e:
+            return Response({'message':e})
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
-def InvoiceLists(request, username):
-    invoiceList = InvoiceList.objects.all()
-    serializer = InvoiceListSerializer(invoiceList, many=True)
-    if request.method == 'GET':
+def InvoiceLists(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'GET' and check == True:
         user = User.objects.get(username=username)
         userID = user.id
         authInvoiceList = InvoiceList.objects.filter(author=userID)
         serialize = InvoiceListSerializer(authInvoiceList, many=True)
         return Response(serialize.data)
-    elif request.method == 'POST':
+    elif request.method == 'POST' and check == True:
         data = request.data
         author = User.objects.get(username=data['author'])
-        addedData = InvoiceList.objects.create(
+        InvoiceList.objects.create(
             author=author,
             invoiceNumber=data['invoiceNumber'],
             customer=data['customer'],
@@ -75,20 +85,18 @@ def InvoiceLists(request, username):
             totalDue=data['totalDue'],
             status=data['status']
         )
-        serializer = InvoiceListSerializer(invoiceList, many=True)
-        return Response(serializer.data)
-    elif request.method == 'DELETE':
+        return Response({'Status':'OK'})
+    elif request.method == 'DELETE' and check == True:
         data = request.data
         user = User.objects.get(username=username)
         userID = user.id
         for invoiceNumber in request.data:
             filteredData = InvoiceList.objects.filter(author=userID, invoiceNumber=invoiceNumber).delete()
-        return Response(request.data)
-    elif request.method == 'PUT':
+        return Response({'Status':'OK'})
+    elif request.method == 'PUT' and check == True:
         data = request.data
         user = User.objects.get(username=username)
         userID = user.id
-
         invoiceData = InvoiceList.objects.get(author=userID, id=data['invoiceNumberOriginal'])
         invoiceData.invoiceNumber = data['invoiceNumber']
         invoiceData.customer = data['customer']
@@ -97,20 +105,18 @@ def InvoiceLists(request, username):
         invoiceData.totalDue = data['totalDue']
         invoiceData.status = data['status']
         invoiceData.save()
-        return Response({'MESSAGE':"UPDATED"})
-
+        return Response({'Status':'OK'})
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def QuoteLists(request, username):
-    quoteList = QuoteList.objects.all()
-    serializer = QuoteListSerializer(quoteList, many=True)
-    if request.method == 'GET':
+def QuoteLists(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'GET' and check == True:
         user = User.objects.get(username=username)
         userID = user.id
         authQuoteList = QuoteList.objects.filter(author=userID)
         serialize = QuoteListSerializer(authQuoteList, many=True)
         return Response(serialize.data)
-    elif request.method == 'POST':
+    elif request.method == 'POST' and check == True:
         data = request.data
         author = User.objects.get(username=data['author'])
         addedData = QuoteList.objects.create(
@@ -124,20 +130,18 @@ def QuoteLists(request, username):
             company=data['company'],
             status=data['status']
         )
-        serializer = QuoteListSerializer(quoteList, many=True)
-        return Response(serializer.data)
-    elif request.method == 'DELETE':
+        return Response({'Status':'OK'})
+    elif request.method == 'DELETE' and check == True:
         data = request.data
         user = User.objects.get(username=username)
         userID = user.id
         for quoteNumber in request.data:
             filteredData = QuoteList.objects.filter(author=userID, quoteNumber=quoteNumber).delete()
-        return Response(request.data)
-    elif request.method == 'PUT':
+        return Response({'Status':'OK'})
+    elif request.method == 'PUT' and check == True:
         data = request.data
         user = User.objects.get(username=username)
         userID = user.id
-
         quoteData = QuoteList.objects.get(author=userID, id=data['quoteNumberOriginal'])
         quoteData.quoteNumber = data['quoteNumber']
         quoteData.createdDate = data['createdDate']
@@ -148,24 +152,22 @@ def QuoteLists(request, username):
         quoteData.total = data['total']
         quoteData.status = data['status']
         quoteData.save()
-
-        return Response(request.data)
+        return Response({'Status':'OK'})
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def Parts(request, username):
-    partList = Part.objects.all()
-    serializer = PartSerializer(partList, many=True)
-    if request.method == 'GET':
+def Parts(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'GET' and check == True:
         data = request.data
         user = User.objects.get(username=username)
         userID = user.id
-        partList = Part.objects.filter(author=userID)
-        serializer = PartSerializer(partList, many=True)
+        partListAuth = Part.objects.filter(author=userID)
+        serializer = PartSerializer(partListAuth, many=True)
         return Response(serializer.data)
-    elif request.method == 'POST':
+    elif request.method == 'POST' and check == True:
         data = request.data
         author = User.objects.get(username=data['author'])
-        addedData = Part.objects.create(
+        Part.objects.create(
             author=author,
             partQuoteNumber=data['partQuoteNumber'],
             partModelNumber=data['partModelNumber'],
@@ -176,23 +178,20 @@ def Parts(request, username):
             partQtyOnHand=data['partQtyOnHand'],
             partQtyCommitted=data['partQtyCommitted']
         )
-        addedData.save()
-        serializer = PartSerializer(partList, many=True)
-        return Response(serializer.data)
-    elif request.method == 'DELETE':
+        return Response({'Status':'OK'})
+    elif request.method == 'DELETE' and check == True:
         data = request.data
         user = User.objects.get(username=username)
         userID = user.id
         if request.data[1] =='allDelete':
             for idNumber in request.data[0]:
                 filteredData = Part.objects.filter(author=userID, id=idNumber).delete()
-            return Response({'allDelete':request.data})
+            return Response({'Status':'OK'})
         elif request.data[1] == 'notDelete':
             for modelNumber in request.data[0]:
                 filteredData = Part.objects.filter(author=userID, partModelNumber=modelNumber).delete()
-            return Response({'notAllDelete':request.data})
-
-    elif request.method == 'PUT':
+            return Response({'Status':'OK'})
+    elif request.method == 'PUT' and check == True:
         data = request.data
         user = User.objects.get(username=username)
         userID = user.id
@@ -207,10 +206,10 @@ def Parts(request, username):
             partData.partQtyOnHand = data['partQtyOnHand']
             partData.partQtyCommitted = data['partQtyCommitted']
             partData.save()
-            return Response(request.data)
+            return Response({'Status':'OK'})
         except:
             author = User.objects.get(username=data['author'])
-            partData = Part.objects.create(
+            Part.objects.create(
                 author=author,
                 partQuoteNumber=data['partQuoteNumber'],
                 partModelNumber=data['partModelNumber'],
@@ -221,14 +220,12 @@ def Parts(request, username):
                 partQtyOnHand=data['partQtyOnHand'],
                 partQtyCommitted=data['partQtyCommitted']
             )
-            partData.save()
-            serializer = PartSerializer(partData, many=True)
-            return Response(serializer.data)
-
+            return Response({'Status':'OK'})
 
 @api_view(['GET'])
-def partSearch(request, username):
-    if request.method == 'GET':
+def partSearch(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'GET' and check == True:
         user = User.objects.get(username=username)
         userID = user.id
         data = QuoteList.objects.filter(author=userID)
@@ -236,20 +233,19 @@ def partSearch(request, username):
         return Response(serializer.data)
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
-def invoiceParts(request, username):
-    invoicePartsList = invoicePart.objects.all()
-    serializer = invoicePartSerializer(invoicePartsList, many=True)
-    if request.method == 'GET':
+def invoiceParts(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'GET' and check == True:
         data = request.data
         user = User.objects.get(username=username)
         userID = user.id
         invoicePartsList = invoicePart.objects.filter(author=userID)
         serializer = invoicePartSerializer(invoicePartsList, many=True)
         return Response(serializer.data)
-    elif request.method == 'POST':
+    elif request.method == 'POST' and check == True:
         data = request.data
         author = User.objects.get(username=data['author'])
-        addedData = invoicePart.objects.create(
+        invoicePart.objects.create(
             author=author,
             itemCode=data['itemCode'],
             partInvoiceNumber=data['partInvoiceNumber'],
@@ -258,10 +254,8 @@ def invoiceParts(request, username):
             unitPrice=data['unitPrice'],
             totalPrice=data['totalPrice']
         )
-        addedData.save()
-        serializer = invoicePartSerializer(invoicePartsList, many=True)
-        return Response(serializer.data)
-    elif request.method == 'DELETE':
+        return Response({'Status':'OK'})
+    elif request.method == 'DELETE' and check == True:
         data = request.data
         user = User.objects.get(username=username)
         userID = user.id
@@ -273,7 +267,7 @@ def invoiceParts(request, username):
             for itemCode in request.data[0]:
                 filteredData = invoicePart.objects.filter(author=userID, itemCode=itemCode).delete()
             return Response({'notAllDelete':request.data})
-    elif request.method == 'PUT':
+    elif request.method == 'PUT' and check == True:
         data = request.data
         user = User.objects.get(username=username)
         userID = user.id
@@ -286,10 +280,10 @@ def invoiceParts(request, username):
             partData.unitPrice = data['unitPrice']
             partData.totalPrice = data['totalPrice']
             partData.save()
-            return Response(request.data)
+            return Response({'Status':'OK'})
         except:
             author = User.objects.get(username=data['author'])
-            partData = invoicePart.objects.create(
+            invoicePart.objects.create(
                 author=author,
                 itemCode=data['itemCode'],
                 partInvoiceNumber=data['partInvoiceNumber'],
@@ -298,32 +292,24 @@ def invoiceParts(request, username):
                 unitPrice=data['unitPrice'],
                 totalPrice=data['totalPrice']
             )
-            return Response({"UPDATED":'TRUE'})
+            return Response({'Status':'OK'})
 
-
-@api_view(['POST', 'GET'])
-def uploadFile(request, username):
-    if request.method == 'GET':
-        data = request.data
-        user = User.objects.get(username=username)
-        userID = user.id
-        fileList = FileInformation.objects.filter(author=userID)
-        serializer = FileInformationSerializer(fileList, many=True)
-        return Response(serializer.data)
-    elif request.method == 'POST':
+@api_view(['POST'])
+def uploadFile(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'POST' and check == True:
         data = request.data
         author = User.objects.get(username=username)
         uploaded_file = request.FILES['files']
         fs = FileSystemStorage()
         name = fs.save(uploaded_file.name, uploaded_file)
         url = fs.url(name)
-        addedData = FileInformation.objects.create(
+        addedData = FileInformation.objects.create (
             author=author,
             fileName=uploaded_file.name,
             fileData=url
         )
         df = pd.read_excel(io=CURR_DIR+url)
-
         quote_number = df['Quote Number'][0]
         created_date = df['Created Date'][0]
         expected_date = df['Expected Date'][0]
@@ -332,7 +318,6 @@ def uploadFile(request, username):
         company = df['Company'][0]
         total = df['Total'][0]
         status = df['Status'][0]
-
         model_number = df['Model Number']
         part_number = df['Part Number']
         description = df['Description']
@@ -340,10 +325,8 @@ def uploadFile(request, username):
         price = df['Price']
         onHand = df['On Hand']
         committed = df['Committed']
-
-
         for x in range(len(model_number)):
-            addedData = Part.objects.create(
+            Part.objects.create(
                 author=author,
                 partQuoteNumber=quote_number,
                 partModelNumber=model_number[x],
@@ -354,8 +337,7 @@ def uploadFile(request, username):
                 partQtyOnHand=onHand[x],
                 partQtyCommitted=committed[x]
             )
-
-        addedData2 = QuoteList.objects.create(
+        QuoteList.objects.create(
             author=author,
             quoteNumber=quote_number,
             customer=customers,
@@ -366,47 +348,37 @@ def uploadFile(request, username):
             company=company,
             status=status
         )
+        return Response({'Status':'OK'})
 
-        return Response({'Imported': 'Success'})
-
-@api_view(['POST', 'GET'])
-def uploadFileInvoice(request, username):
-    if request.method == 'GET':
-        data = request.data
-        user = User.objects.get(username=username)
-        userID = user.id
-        fileList = FileInformation.objects.filter(author=userID)
-        serializer = FileInformationSerializer(fileList, many=True)
-        return Response(serializer.data)
-    elif request.method == 'POST':
+@api_view(['POST'])
+def uploadFileInvoice(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'POST' and check == True:
         data = request.data
         author = User.objects.get(username=username)
         uploaded_file = request.FILES['files']
         fs = FileSystemStorage()
         name = fs.save(uploaded_file.name, uploaded_file)
         url = fs.url(name)
-        addedData = FileInformation.objects.create(
+        FileInformation.objects.create (
             author=author,
             fileName=uploaded_file.name,
             fileData=url
         )
         df = pd.read_excel(io=CURR_DIR+url)
-
         invoice_number = df['Invoice Number'][0]
         customer = df['Customer'][0]
         created_date = df['Created Date'][0]
         due_date = df['Due Date'][0]
         total = df['Total'][0]
         status = df['Status'][0]
-
         item_code = df['Item Code']
         description = df['Description']
         quantity = df['Quantity']
         unit_price = df['Unit Price']
         total_price = df['Total Price']
-
         for x in range(len(item_code)):
-            addedData = invoicePart.objects.create(
+            invoicePart.objects.create(
                 author=author,
                 partInvoiceNumber=invoice_number,
                 itemCode=item_code[x],
@@ -415,7 +387,7 @@ def uploadFileInvoice(request, username):
                 unitPrice=unit_price[x],
                 totalPrice=total_price[x],
             )
-        addedData2 = InvoiceList.objects.create(
+        InvoiceList.objects.create(
             author=author,
             invoiceNumber=invoice_number,
             customer=customer,
@@ -424,13 +396,13 @@ def uploadFileInvoice(request, username):
             totalDue=total,
             status=status
         )
-        return Response({'Imported': 'Success'})
+        return Response({'Status':'OK'})
 
 @api_view(['POST'])
-def quotePDF(request, username):
-    if request.method == 'POST':
+def quotePDF(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'POST' and check == True:
         info = request.data
-
         quoteNumber = info['quoteNumber']
         customer = info['customer']
         total = info['total']
@@ -438,7 +410,6 @@ def quotePDF(request, username):
         salesperson = info['salesperson']
         expectedDate = info['expectedDate']
         company = info['company']
-
         modelNumber = info['modelNumber']
         partNumber = info['partNumber']
         description = info['description']
@@ -446,16 +417,13 @@ def quotePDF(request, username):
         price = info['price']
         onHand = info['onHand']
         comitted = info['comitted']
-
         header_info = ['Model #', 'Part #', 'Desc.', 'Cost', 'Price', 'Hand', 'Committed']
         data = []
         for x in range(len(modelNumber)):
             dataToBeAppended = [modelNumber[x], partNumber[x], Paragraph(description[x]), cost[x], price[x], onHand[x], comitted[x]]
             data.append(dataToBeAppended)
         data.append(header_info)
-
         fileName = CURR_DIR + '/api/PDFs/' + quoteNumber + '.pdf'
-
         pdf = canvas.Canvas(fileName, bottomup=False, pagesize=A4)
         pdf.drawImage(CURR_DIR+'/api/header.jpeg', 7,9,580,70)
         pdf.setFillColorRGB(255,255,255)
@@ -501,7 +469,7 @@ def quotePDF(request, username):
         table.setStyle([
 				('FONTNAME', (0,-1), (-1,-1), 'Courier-Bold'),
 				('FONTSIZE', (0,-1), (-1,-1), 12),
-                ("BOTTOMPADDING", (0,0), (-1,-1), 10),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 10),
                 ("TOPPADDING", (0,0), (-1,-1), 10),
                 ('BACKGROUND', (0,-1), (-1,-1), colors.green),
                 ('TEXTCOLOR', (0,-1), (-1,-1), colors.white),
@@ -515,30 +483,26 @@ def quotePDF(request, username):
         return FileResponse(open(fileName, 'rb'))
 
 @api_view(['POST'])
-def invoicePDF(request, username):
-    if request.method == 'POST':
+def invoicePDF(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'POST' and check == True:
         info = request.data
-
         invoiceNumber = info['invoiceNumber']
         customer = info['customer']
         createdDate = info['createdDate']
         dueDate = info['dueDate']
         totalDue = info['totalDue']
-
         itemCode = info['itemCode']
         description = info['description']
         quantity = info['quantity']
         unitPrice = info['unitPrice']
         totalPrice = info['totalPrice']
-
         header_info = ['Item Code', 'Desc.', 'Quantity', 'Unit Price', 'Total Price']
         data = []
-
         for x in range(len(itemCode)):
             dataToBeAppended = [itemCode[x], Paragraph(description[x]), quantity[x], unitPrice[x], totalPrice[x]]
             data.append(dataToBeAppended)
         data.append(header_info)
-
         fileName = CURR_DIR + '/api/PDFs/' + invoiceNumber + '.pdf'
         pdf = canvas.Canvas(fileName, bottomup=False, pagesize=A4)
         pdf.drawImage(CURR_DIR+'/api/header.jpeg', 7,9,580,70)
@@ -573,8 +537,8 @@ def invoicePDF(request, username):
         table.setStyle([
 				('FONTNAME', (0,-1), (-1,-1), 'Courier-Bold'),
 				('FONTSIZE', (0,-1), (-1,-1), 12),
-                ("BOTTOMPADDING", (0,0), (-1,-1), 10),
-                ("TOPPADDING", (0,0), (-1,-1), 10),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+                ('TOPPADDING', (0,0), (-1,-1), 10),
                 ('BACKGROUND', (0,-1), (-1,-1), colors.green),
                 ('TEXTCOLOR', (0,-1), (-1,-1), colors.white),
                 ('BOX', (0,0), (-1,-1), 0.25, colors.black),
@@ -587,41 +551,35 @@ def invoicePDF(request, username):
         return FileResponse(open(fileName, 'rb'))
 
 @api_view(['POST'])
-def emailPDF(request, username):
-    if request.method == 'POST':
+def emailPDF(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'POST' and check == True:
         data = request.data
         author = User.objects.get(username=username)
         if request.data['nowOrLater'] == 'now':
             email = 'xxx'
             password = 'xxx'
-
             contactsArray = []
             contacts = request.data['recipients'].split(' ')
-
             for contact in contacts:
                 contactsArray.append(contact)
-
             msg = EmailMessage()
             msg['Subject'] = request.data['subject']
             msg['From'] = email
             msg['To'] = contactsArray
             msg.set_content(request.data['message'])
-
             uploaded_file = request.FILES['filePDF']
             fs = FileSystemStorage()
             name = fs.save(uploaded_file.name, uploaded_file)
             url = fs.url(name)
-
             with open(CURR_DIR + url, 'rb') as f:
                 file_data = f.read()
                 file_name = request.FILES['filePDF'].name
                 msg.add_attachment(file_data, maintype='application', subtype='octet-stream', filename=file_name)
-
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
                 smtp.login(email, password)
                 smtp.send_message(msg)
-
-            return Response("PDF Sent")
+            return Response({'Status':'OK'})
         elif request.data['nowOrLater'] == 'later':
             uploaded_file = request.FILES['filePDF']
             fs = FileSystemStorage()
@@ -638,4 +596,4 @@ def emailPDF(request, username):
                 fileName=request.FILES['filePDF'].name,
                 date=request.data['timeToSend']
             )
-            return Response({'message':'Great'})
+            return Response({'Status':'OK'})

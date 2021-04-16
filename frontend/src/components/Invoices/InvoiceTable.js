@@ -17,10 +17,18 @@ class InvoiceTable extends Component {
       display: 'none',
       invoiceID: 0,
       invoiceNumberOriginal: '',
+      filterArray: false,
+      uniqueData: [],
+      filteredData: [],
 
       display2: 'none',
       display3: 'none',
       display4: 'none',
+      display5: 'none',
+      display5_1: true,
+      display5_2: '1',
+
+      databaseSearch: '',
 
       invoiceNumber: '',
       customer: '',
@@ -49,11 +57,14 @@ class InvoiceTable extends Component {
 
       file: null,
 
+      username: document.cookie.split('&')[0].split('=')[1],
+      token: document.cookie.split('&')[1].split('=')[1]
+
     }
   }
 
   componentDidMount() {
-    axios.get(`http://localhost:8000/api/invoiceList/${document.cookie.split(';')[0].split('=')[1]}`)
+    axios.get(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`)
     .then(res => {
       this.setState({data:res.data})
     })
@@ -69,7 +80,7 @@ class InvoiceTable extends Component {
       opacity: '0.3'
     })
 
-    axios.get(`http://localhost:8000/api/invoiceList/${document.cookie.split(';')[0].split('=')[1]}`).then(res => {
+    axios.get(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`).then(res => {
       for (var i = 0; i < res.data.length; i++) {
         if (res.data[i].id === id) {
           this.setState({
@@ -82,7 +93,7 @@ class InvoiceTable extends Component {
           })
         }
       }
-      axios.get(`http://localhost:8000/api/part-invoice/${document.cookie.split(';')[0].split('=')[1]}`).then(res => {
+      axios.get(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`).then(res => {
         res.data.filter((x) => {
           if (x.partInvoiceNumber === this.state.invoiceNumber) {
             this.state.databaseID.push(x.id)
@@ -165,7 +176,7 @@ class InvoiceTable extends Component {
   }
 
   saveInvoice = (event) => {
-    axios.delete(`http://localhost:8000/api/part-invoice/${document.cookie.split(';')[0].split('=')[1]}`, {'data': [this.state.deleteSave, 'notDelete']})
+    axios.delete(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`, {'data': [this.state.deleteSave, 'notDelete']})
 
     for (var i = 0; i < this.state.partID; i++) {
       if (document.getElementById(`invoice-tableParts-1-itemCode${i}`) !== null &&
@@ -182,7 +193,7 @@ class InvoiceTable extends Component {
           var infoToBeUpdated = {
             'invoiceNumberOriginal':this.state.databaseID[i],
             'partInvoiceNumber':this.state.invoiceNumber,
-            'author':document.cookie.split(';')[0].split('=')[1],
+            'author':document.cookie.split('&')[0].split('=')[1],
             'itemCode':this.state.itemCodeSave[i],
             'description':this.state.descriptionSave[i],
             'quantity':this.state.quantitySave[i],
@@ -190,14 +201,14 @@ class InvoiceTable extends Component {
             'totalPrice':this.state.totalPriceSave[i],
           }
 
-          axios.put(`http://localhost:8000/api/part-invoice/${document.cookie.split(';')[0].split('=')[1]}`, infoToBeUpdated).then(res => {
+          axios.put(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`, infoToBeUpdated).then(res => {
             console.log(res)
           })
       }
     }
 
     var updatedHeaderInfo = {
-      'author':document.cookie.split(';')[0].split('=')[1],
+      'author':document.cookie.split('&')[0].split('=')[1],
       'invoiceNumberOriginal':this.state.invoiceNumberOriginal,
       'customer':this.state.customer,
       'invoiceNumber':this.state.invoiceNumber,
@@ -207,15 +218,15 @@ class InvoiceTable extends Component {
       'status':this.state.status
     }
 
-    axios.put(`http://localhost:8000/api/invoiceList/${document.cookie.split(';')[0].split('=')[1]}`,  updatedHeaderInfo).then(res => {
+    axios.put(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`,  updatedHeaderInfo).then(res => {
       window.location.href = 'http://localhost:3000/invoices'
     })
 
   }
 
   deleteInvoice = (event) => {
-    axios.delete(`http://localhost:8000/api/invoiceList/${document.cookie.split(';')[0].split('=')[1]}`, {'data':[this.state.invoiceNumber]}).then(res => {
-      axios.delete(`http://localhost:8000/api/part-invoice/${document.cookie.split(';')[0].split('=')[1]}`, {'data': [this.state.databaseID, 'allDelete']}).then(res => {
+    axios.delete(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`, {'data':[this.state.invoiceNumber]}).then(res => {
+      axios.delete(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`, {'data': [this.state.databaseID, 'allDelete']}).then(res => {
         window.location.href = 'http://localhost:3000/invoices'
       })
     })
@@ -231,7 +242,7 @@ class InvoiceTable extends Component {
   submitFile = (event) => {
     const formData = new FormData()
     formData.append('files', this.state.file)
-    axios.post(`http://localhost:8000/api/uploadFileInvoice/${document.cookie.split(';')[0].split('=')[1]}`, formData).then(res => {
+    axios.post(`http://localhost:8000/api/uploadFileInvoice/${this.state.username}/${this.state.token}`, formData).then(res => {
       console.log(res)
       this.setState({
         display2: 'none',
@@ -272,7 +283,7 @@ class InvoiceTable extends Component {
       },
       body: JSON.stringify(infoToBePDFed)
     }
-    fetch(`http://localhost:8000/api/invoicePDF/${document.cookie.split(';')[0].split('=')[1]}`, options).then(
+    fetch(`http://localhost:8000/api/invoicePDF/${this.state.username}/${this.state.token}`, options).then(
       response => {
         response.blob().then(blob => {
           let url = window.URL.createObjectURL(blob)
@@ -307,25 +318,63 @@ class InvoiceTable extends Component {
       display4: 'block'
     })
 
-    axios.post(`http://localhost:8000/api/email/${document.cookie.split(';')[0].split('=')[1]}`, formData).then(res => {
+    axios.post(`http://localhost:8000/api/email/${this.state.username}/${this.state.token}`, formData).then(res => {
       window.location.href = 'http://localhost:3000/invoices'
     })
   }
 
+  showSearch = (event) => {
+    this.setState({
+      display5_2: '0.3',
+      display5: 'block',
+    })
 
+    if (this.state.display5_1 === true) {
+      this.setState({
+        display5_1: false,
+        display5_2: '0.3',
+        display5: 'block',
+      })
+    } else if (this.state.display5_1 === false) {
+      this.setState({
+        display5_1: true,
+        display5_2: '1',
+        display5: 'none',
+      })
+    }
+  }
 
-
+  search = (event) => {this.setState({databaseSearch: event.target.value}, () => {
+      if (event.target.value !== '') {
+        this.setState({filterArray:true})
+        this.state.data.filter(x => {
+          if (x.invoiceNumber.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.customer.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.createdDate.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.dueDate.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.totalDue.toLowerCase().includes(event.target.value.toLowerCase()) ||
+          x.status.toLowerCase().includes(event.target.value.toLowerCase())) {
+            this.state.uniqueData.push(x)
+          }
+        })
+      } else if (event.target.value === '') {
+        this.setState  ({filterArray:false})
+      }
+      this.state.filteredData = this.state.uniqueData
+      this.state.uniqueData = []
+    })
+  }
 
   render() {
     return (
       <>
-        <div className='invoices-user' style={{'opacity':this.state.opacity}}>
+        <div className='invoices-user' style={{'opacity':this.state.opacity}} style={{'opacity':this.state.display5_2}}>
           <img src={image2} alt=''/>
           <hr id='user-line'></hr>
-          <p>{document.cookie.split(';')[0].split('=')[1]}</p>
-          <p>{`${document.cookie.split(';')[0].split('=')[1]}@gmail.com`}</p>
+          <p>{`${document.cookie.split('&')[2].split('=')[1]} ${document.cookie.split('&')[3].split('=')[1]}`}</p>
+          <p>{`${document.cookie.split('&')[4].split('=')[1]}`}</p>
         </div>
-        <div className='invoices-buttons' style={{'opacity':this.state.opacity}}>
+        <div className='invoices-buttons' style={{'opacity':this.state.opacity}} style={{'opacity':this.state.display5_2}}>
           <div id='buttons-background-image'>
             <img src={image} alt=''/>
           </div>
@@ -352,24 +401,33 @@ class InvoiceTable extends Component {
             <div id='invoicesTable-table-table'>
               <table>
               {
-                this.state.data.map(info => <TableTemplate invoiceNumber={info.invoiceNumber}
+                this.state.filterArray ? this.state.filteredData.map(info => <TableTemplate invoiceNumber={info.invoiceNumber}
                                                           customer={info.customer}
                                                           createdDate={info.createdDate}
                                                           dueDate={info.dueDate}
                                                           totalDue={info.totalDue}
                                                           status={info.status}
                                                           myFunction={this.sendIDtoEditPage}
-                                                          id={info.id}/>)
-
+                                                          id={info.id}/>) : this.state.data.map(info => <TableTemplate invoiceNumber={info.invoiceNumber}
+                                                                                                    customer={info.customer}
+                                                                                                    createdDate={info.createdDate}
+                                                                                                    dueDate={info.dueDate}
+                                                                                                    totalDue={info.totalDue}
+                                                                                                    status={info.status}
+                                                                                                    myFunction={this.sendIDtoEditPage}
+                                                                                                    id={info.id}/>)
               }
               </table>
             </div>
           </div>
           <div id='invoicesTable-buttons' style={{'opacity':this.state.opacity}}>
-            <button id='invoicesTable-buttons-search'>Search</button>
+            <button id='invoicesTable-buttons-search' onClick={this.showSearch}>{this.state.display5_1 ? "Search" : "Cancel"}</button>
           </div>
         </div>
 
+        <div id='search-field' style={{display:this.state.display5}}>
+          <input id='database_search' autofocus type='text' value={this.state.databaseSearch} onChange={this.search} placeholder='Database Search'/>
+        </div>
 
         <div id='importing-page' style={{display:this.state.display2}}>
           <label>Import Excel File</label><br></br>

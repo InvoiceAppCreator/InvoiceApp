@@ -7,7 +7,7 @@ class CreateInvoice extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      invoiceNumber: '',
+      invoiceNumber: `I-${Math.floor((Math.random() * 20000000) + 1)}`,
       customer: '',
       total: '',
       createdDate: `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
@@ -22,7 +22,10 @@ class CreateInvoice extends Component {
       delete: [],
 
       partID: 1,
-      partData: [<CreateInvoiceTable partKey={0}/>]
+      partData: [<CreateInvoiceTable partKey={0}/>],
+
+      username: document.cookie.split('&')[0].split('=')[1],
+      token: document.cookie.split('&')[1].split('=')[1]
     }
   }
 
@@ -65,29 +68,29 @@ class CreateInvoice extends Component {
         var info = {
           'partInvoiceNumber' : this.state.invoiceNumber,
           'itemCode': this.state.itemCode[i],
-          'author' :  document.cookie.split(';')[0].split('=')[1],
+          'author' :  document.cookie.split('&')[0].split('=')[1],
           'description' : this.state.description[i],
           'quantity' : this.state.quantity[i],
           'unitPrice' : this.state.unitPrice[i],
           'totalPrice' : this.state.totalPrice[i],
         }
 
-        axios.post(`http://localhost:8000/api/part-invoice/${document.cookie.split(';')[0].split('=')[1]}`, info).then(res => {
+        axios.post(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`, info).then(res => {
           console.log(res)
         })
       }
     }
 
     var invoiceData = {
-      'author': document.cookie.split(';')[0].split('=')[1],
+      'author': document.cookie.split('&')[0].split('=')[1],
       'invoiceNumber': this.state.invoiceNumber,
       'customer': this.state.customer,
       'createdDate': this.state.createdDate,
-      'dueDate': this.state.createdDate,
-      'totalDue': this.state.dueDate,
+      'dueDate': this.state.dueDate,
+      'totalDue': this.state.total,
       'status': this.state.status,
     }
-    axios.post(`http://localhost:8000/api/invoiceList/${document.cookie.split(';')[0].split('=')[1]}`, invoiceData).then(res => {
+    axios.post(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`, invoiceData).then(res => {
       console.log(res)
       window.location.href = 'http://localhost:3000/invoices/'
     })
@@ -104,7 +107,7 @@ class CreateInvoice extends Component {
         </nav>
 
         <div className='main-information-fill'>
-          <label style={{'margin-left':'15px'}}>Invoice Number</label><input style={{'margin-left':'20px'}} type='text' placeholder='Invoice Number' value={this.state.invoiceNumber} onChange={e => {this.setState({invoiceNumber:e.target.value})}}/>
+          <label style={{'margin-left':'15px'}}>Invoice Number</label><input style={{'margin-left':'20px'}} type='text' placeholder='Invoice Number' disabled value={this.state.invoiceNumber} onChange={e => {this.setState({invoiceNumber:e.target.value})}}/>
           <label style={{'margin-left':'20px'}}>Customer</label><input style={{'margin-left':'20px'}} type='text' placeholder='Customer Name' value={this.state.customer} onChange={e => {this.setState({customer:e.target.value})}}/>
           <label style={{'margin-left':'20px'}}>Total Due</label><input style={{'margin-left':'20px'}} type='text' placeholder='Total' value={this.state.total} onChange={e => {this.setState({total:e.target.value})}}/><br></br>
           <label style={{'margin-left':'15px'}}>Created</label><input style={{'margin-left':'87px'}} type='text' placeholder='Created Date' value={this.state.createdDate} disabled onChange={e => {this.setState({createdDate:e.target.value})}}/>

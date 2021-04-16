@@ -19,3 +19,41 @@
   text-align: center;
   border-left: 2px solid black;
 }
+
+.data-box {
+  position: absolute;
+  background-color: white;
+  font-size: 12px;
+  width: 19.5%;
+  margin-left:10.1%;
+  margin-top: 2.4%;
+  max-height: 200px;
+  min-height: 0px;
+  border-radius: 0px 0px 20px 20px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border: 2px solid black;
+  color: black;
+}
+
+.data-box table {
+  width: 100%;
+  padding: 3%;
+  border-collapse: collapse;
+}
+
+#quoteNumber-input:focus {
+  border-radius: 20px 20px 0px 0px;
+}
+
+td {
+  padding-left: 5%;
+  padding-right: 5%;
+  border-bottom: 2px solid black;
+}
+
+.data-box tr:nth-child(even){background-color: #f2f2f2;}
+
+.data-box tr:hover {
+  background-color: #ddd;
+}

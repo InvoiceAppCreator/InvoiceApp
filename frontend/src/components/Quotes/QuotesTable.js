@@ -39,7 +39,6 @@ class QuotesTable extends Component {
       expectedDate: '',
       company: '',
 
-
       databaseID: [],
       modelNumber: [],
       partNumber: [],
@@ -69,7 +68,10 @@ class QuotesTable extends Component {
       pdfFile: null,
       nowOrLater : '',
       timeToSend: '',
-      subject: ''
+      subject: '',
+
+      username: document.cookie.split('&')[0].split('=')[1],
+      token: document.cookie.split('&')[1].split('=')[1]
     }
   }
 
@@ -82,7 +84,7 @@ class QuotesTable extends Component {
   }
 
   componentDidMount() {
-    axios.get(`http://localhost:8000/api/quoteList/${document.cookie.split(';')[0].split('=')[1]}`)
+    axios.get(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`)
     .then(res => {
       this.setState({data:res.data})
     })
@@ -97,7 +99,7 @@ class QuotesTable extends Component {
       quoteID: id,
     })
 
-    axios.get(`http://localhost:8000/api/quoteList/${document.cookie.split(';')[0].split('=')[1]}`).then(res => {
+    axios.get(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`).then(res => {
       for (var i = 0; i < res.data.length; i++) {
         if (res.data[i].id === id) {
           this.setState({
@@ -112,7 +114,7 @@ class QuotesTable extends Component {
           })
         }
       }
-      axios.get(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`).then(res => {
+      axios.get(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`).then(res => {
         res.data.filter((x) => {
           if (x.partQuoteNumber === this.state.quoteNumber) {
             this.state.databaseID.push(x.id)
@@ -203,7 +205,7 @@ class QuotesTable extends Component {
 
   saveQuote = () => {
 
-    axios.delete(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`, {'data': [this.state.deleteSave, 'notDelete']})
+    axios.delete(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`, {'data': [this.state.deleteSave, 'notDelete']})
 
     for (var i = 0; i < this.state.partID; i++) {
       if (document.getElementById(`quote-tableParts-1-modelNumber${i}`) !== null &&
@@ -224,7 +226,7 @@ class QuotesTable extends Component {
             var infoToBeUpdated = {
               'quoteNumberOriginal': this.state.databaseID[i],
               'partQuoteNumber': this.state.quoteNumber,
-              'author': document.cookie.split(';')[0].split('=')[1],
+              'author': document.cookie.split('&')[0].split('=')[1],
               'partModelNumber': this.state.modelNumberSave[i],
               'partNumber': this.state.partNumberSave[i],
               'partDescription': this.state.descriptionSave[i],
@@ -234,7 +236,7 @@ class QuotesTable extends Component {
               'partQtyCommitted': this.state.comittedSave[i]
             }
 
-            axios.put(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`, infoToBeUpdated).then(res => {
+            axios.put(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`, infoToBeUpdated).then(res => {
 
             })
 
@@ -242,7 +244,7 @@ class QuotesTable extends Component {
 
     }
     var updatedHeaderInfo = {
-      'author': document.cookie.split(';')[0].split('=')[1],
+      'author': document.cookie.split('&')[0].split('=')[1],
       'quoteNumberOriginal': this.state.quoteNumberOriginal,
       'quoteNumber': this.state.quoteNumber,
       'createdDate': this.state.createdDate,
@@ -255,7 +257,7 @@ class QuotesTable extends Component {
     }
 
 
-    axios.put(`http://localhost:8000/api/quoteList/${document.cookie.split(';')[0].split('=')[1]}`, updatedHeaderInfo).then(res => {
+    axios.put(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`, updatedHeaderInfo).then(res => {
       window.location.href = 'http://localhost:3000/quotes'
     })
     this.setState({
@@ -286,8 +288,8 @@ class QuotesTable extends Component {
   }
 
   deleteQuote = (event) => {
-    axios.delete(`http://localhost:8000/api/quoteList/${document.cookie.split(';')[0].split('=')[1]}`, {'data':[this.state.quoteNumber]}).then(res => {
-      axios.delete(`http://localhost:8000/api/parts/${document.cookie.split(';')[0].split('=')[1]}`, {'data': [this.state.databaseID, 'allDelete']}).then(res => {
+    axios.delete(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`, {'data':[this.state.quoteNumber]}).then(res => {
+      axios.delete(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`, {'data': [this.state.databaseID, 'allDelete']}).then(res => {
         window.location.href = 'http://localhost:3000/quotes'
       })
     })
@@ -305,11 +307,15 @@ class QuotesTable extends Component {
   submitFile = (event) => {
     const formData = new FormData()
     formData.append('files', this.state.file)
-    axios.post(`http://localhost:8000/api/uploadFile/${document.cookie.split(';')[0].split('=')[1]}`, formData).then(res => {
+    axios.post(`http://localhost:8000/api/uploadFile/${this.state.username}/${this.state.token}`, formData).then(res => {
       console.log(res)
       this.setState({
         display2: 'none',
         opacity: '1',
+      })
+      this.setState({
+        display2: 'none',
+        display4: 'block'
       })
       window.location.href = 'http://localhost:3000/quotes'
     })
@@ -350,7 +356,7 @@ class QuotesTable extends Component {
       },
       body: JSON.stringify(infoToBePDFed)
     }
-    fetch(`http://localhost:8000/api/quotePDF/${document.cookie.split(';')[0].split('=')[1]}`, options).then(
+    fetch(`http://localhost:8000/api/quotePDF/${this.state.username}/${this.state.token}`, options).then(
       response => {
         response.blob().then(blob => {
           let url = window.URL.createObjectURL(blob)
@@ -386,7 +392,7 @@ class QuotesTable extends Component {
       display4: 'block'
     })
 
-    axios.post(`http://localhost:8000/api/email/${document.cookie.split(';')[0].split('=')[1]}`, formData).then(res => {
+    axios.post(`http://localhost:8000/api/email/${this.state.username}/${this.state.token}`, formData).then(res => {
       window.location.href = 'http://localhost:3000/quotes'
     })
   }
@@ -396,8 +402,6 @@ class QuotesTable extends Component {
       display5_2: '0.3',
       display5: 'block',
     })
-
-    // const inputSearch = document.getElementById('database_search')
 
     if (this.state.display5_1 === true) {
       this.setState({
@@ -443,8 +447,8 @@ class QuotesTable extends Component {
         <div className='quotes-user' style={{'opacity':this.state.opacity}} style={{'opacity':this.state.display5_2}}>
           <img src={image2} alt=''/>
           <hr id='user-line'></hr>
-          <p>{document.cookie.split(';')[0].split('=')[1]}</p>
-          <p>{`${document.cookie.split(';')[0].split('=')[1]}@gmail.com`}</p>
+          <p>{`${document.cookie.split('&')[2].split('=')[1]} ${document.cookie.split('&')[3].split('=')[1]}`}</p>
+          <p>{`${document.cookie.split('&')[4].split('=')[1]}`}</p>
         </div>
         <div className='quotes-buttons' style={{'opacity':this.state.opacity}} style={{'opacity':this.state.display5_2}}>
           <div id='quotes-buttons-background-image'>
