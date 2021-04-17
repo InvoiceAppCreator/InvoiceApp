@@ -3,7 +3,6 @@ import '../components/Quotes/ConvertToInvoice.css'
 import CreateConvertTable from '../components/Quotes/CreateConvertTable'
 import axios from 'axios'
 import SearchTable from '../components/Quotes/SearchTable'
-import { useState, useRef, useEffect } from "react";
 
 class ConvertToInvoice extends Component {
 
@@ -119,7 +118,6 @@ class ConvertToInvoice extends Component {
       this.gettingQuoteNumberData(this.state.quoteNumber)
       if (event.target.value !== '') {
         this.setState({filterArray:true})
-        this.state.data.filter(x => {
           this.state.data.filter(x => {
             if (x.quoteNumber.toLowerCase().includes(event.target.value.toLowerCase()) ||
             x.createdDate.toLowerCase().includes(event.target.value.toLowerCase()) ||
@@ -131,15 +129,19 @@ class ConvertToInvoice extends Component {
             x.status.toLowerCase().includes(event.target.value.toLowerCase())) {
               this.state.uniqueData.push(x)
             }
+            return 0
           })
-        })
 
       } else if (event.target.value === '') {
         this.setState  ({filterArray:false})
       }
-      this.state.filteredData = this.state.uniqueData
-      this.state.filteredData = [...new Set(this.state.filteredData)]
-      this.state.uniqueData = []
+      this.setState({
+        filteredData: this.state.uniqueData,
+      })
+      this.setState({
+        filteredData: [...new Set(this.state.filteredData)],
+        uniqueData: []
+      })
     })
   }
 
@@ -189,7 +191,7 @@ class ConvertToInvoice extends Component {
   }
 
   hideSearch = (event) => {
-    if (document.activeElement.id != 'quoteNumber-input') {
+    if (document.activeElement.id !== 'quoteNumber-input') {
       this.setState({
         display1: 'none'
       })
@@ -203,7 +205,7 @@ class ConvertToInvoice extends Component {
         <nav className='quotes-nav'>
             <h1 id='nav-header'>Convert to Invoice</h1>
             <div style={{'margin-left':'55%'}}  id='nav-nav'>
-              <p><a href='/quotes'>Quotes&nbsp;</a> <a>|&nbsp;</a> <a href='/invoices'>Invoices&nbsp;</a> <a>|&nbsp;</a> <a href='/home'>Home&nbsp;</a> <a>|&nbsp;</a> <a>Settings&nbsp;</a> <a>|&nbsp;</a> <a href='/logout'>Logout&nbsp;</a></p>
+              <p><a href='/quotes'>Quotes&nbsp;</a> <a href='/#'>|&nbsp;</a> <a href='/invoices'>Invoices&nbsp;</a> <a href='/#'>|&nbsp;</a> <a href='/home'>Home&nbsp;</a> <a href='/#'>|&nbsp;</a> <a href='/settings'>Settings&nbsp;</a> <a href='/#'>|&nbsp;</a> <a href='/logout'>Logout&nbsp;</a></p>
             </div>
         </nav>
 

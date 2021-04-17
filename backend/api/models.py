@@ -6,7 +6,6 @@ class User(models.Model):
     username = models.CharField(max_length=100, unique=True)
     email = models.EmailField(max_length=100, unique=True)
     password = models.CharField(max_length=500)
-    #image = models.ImageField() -- learn about that
     def __str__(self):
         return self.username
 
@@ -61,13 +60,13 @@ class invoicePart(models.Model):
 class FileInformation(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     fileName = models.CharField(max_length=100)
-    fileData = models.FileField(upload_to='media/excel')
+    fileData = models.FileField(upload_to='excel/')
     def __str__(self):
         return self.fileName
 
 class EmailInfo(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    PDF = models.FileField(upload_to='media/pdf/')
+    PDF = models.FileField(upload_to='pdf/')
     recipients = models.CharField(max_length=100)
     message = models.CharField(max_length=500)
     now = models.BooleanField()
@@ -77,3 +76,8 @@ class EmailInfo(models.Model):
     date = models.CharField(max_length=100, default='')
     def __str__(self):
         return self.fileName
+
+class UserImages(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    profilePicture = models.ImageField(upload_to ='faces/', default='faces/default.png')
+    backgroundPicture = models.ImageField(upload_to='background/', default='background/default.png')

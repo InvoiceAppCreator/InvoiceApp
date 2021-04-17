@@ -102,7 +102,7 @@ class CreateInvoice extends Component {
         <nav className='invoices-nav'>
             <h1 id='nav-header'>Create Invoice</h1>
             <div style={{'margin-left':'55%'}}  id='nav-nav'>
-              <p><a href='/invoices'>Invoices&nbsp;</a> <a>|&nbsp;</a> <a href='/quotes'>Quotes&nbsp;</a> <a>|&nbsp;</a> <a href='/home'>Home&nbsp;</a> <a>|&nbsp;</a> <a>Settings&nbsp;</a> <a>|&nbsp;</a> <a href='/logout'>Logout&nbsp;</a></p>
+              <p><a href='/invoices'>Invoices&nbsp;</a> <a href='/#'>|&nbsp;</a> <a href='/quotes'>Quotes&nbsp;</a> <a href='/#'>|&nbsp;</a> <a href='/home'>Home&nbsp;</a> <a href='/#'>|&nbsp;</a> <a href='/settings'>Settings&nbsp;</a> <a href='/#'>|&nbsp;</a> <a href='/logout'>Logout&nbsp;</a></p>
             </div>
         </nav>
 
@@ -148,7 +148,7 @@ class CreateInvoice extends Component {
 
           <div id='save-add-delete'>
             <button onClick={this.addPart}>Add Part</button>
-            <button onClick={this.createInvoice}>Create Invoice</button>
+            <button onClick={this.createInvoice}>Save Invoice</button>
             <button onClick={this.deleteSelected}>Delete Selected</button>
           </div>
         </div>

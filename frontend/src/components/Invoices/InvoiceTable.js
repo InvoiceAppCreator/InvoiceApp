@@ -2,8 +2,6 @@ import React, { Component } from 'react'
 import './Invoices.css'
 import axios from 'axios'
 import TableTemplate from './TableTemplate'
-import image from '../Home/Images/SunBackground.jpg'
-import image2 from '../Quotes/Images/sampleFace2.png'
 import loader from '../Quotes/Images/loading2.gif'
 import EditTable from './EditTable'
 
@@ -12,6 +10,8 @@ class InvoiceTable extends Component {
   constructor(props) {
     super(props)
     this.state = {
+      profilePicture: '',
+      backgroundPicture: '',
       data: [],
       opacity: '1',
       display: 'none',
@@ -67,6 +67,13 @@ class InvoiceTable extends Component {
     axios.get(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`)
     .then(res => {
       this.setState({data:res.data})
+    })
+    axios.get(`http://localhost:8000/api/userImages/${this.state.username}/${this.state.token}`)
+    .then(res => {
+      this.setState({
+        profilePicture:`http://localhost:8000${res.data[0].profilePicture}`,
+        backgroundPicture:`http://localhost:8000${res.data[0].backgroundPicture}`,
+      })
     })
   }
 
@@ -356,12 +363,15 @@ class InvoiceTable extends Component {
           x.status.toLowerCase().includes(event.target.value.toLowerCase())) {
             this.state.uniqueData.push(x)
           }
+          return 0
         })
       } else if (event.target.value === '') {
         this.setState  ({filterArray:false})
       }
-      this.state.filteredData = this.state.uniqueData
-      this.state.uniqueData = []
+      this.setState({
+        filteredData: this.state.uniqueData,
+        uniqueData: []
+      })
     })
   }
 
@@ -369,14 +379,14 @@ class InvoiceTable extends Component {
     return (
       <>
         <div className='invoices-user' style={{'opacity':this.state.opacity}} style={{'opacity':this.state.display5_2}}>
-          <img src={image2} alt=''/>
+          <img src={this.state.profilePicture} alt=''/>
           <hr id='user-line'></hr>
           <p>{`${document.cookie.split('&')[2].split('=')[1]} ${document.cookie.split('&')[3].split('=')[1]}`}</p>
           <p>{`${document.cookie.split('&')[4].split('=')[1]}`}</p>
         </div>
         <div className='invoices-buttons' style={{'opacity':this.state.opacity}} style={{'opacity':this.state.display5_2}}>
           <div id='buttons-background-image'>
-            <img src={image} alt=''/>
+            <img src={this.state.backgroundPicture} alt=''/>
           </div>
           <div id='buttons-function-buttons' style={{'opacity':this.state.opacity}}>
             <button id='button-functions-buttons-create' onClick={this.createInvoice}>Create</button>

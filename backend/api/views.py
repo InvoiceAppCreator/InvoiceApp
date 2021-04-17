@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from .serializers import UserSerializer, InvoiceListSerializer, QuoteListSerializer, PartSerializer, invoicePartSerializer, FileInformationSerializer
-from .models import User, InvoiceList, QuoteList, Part, invoicePart, FileInformation, EmailInfo
+from .serializers import UserSerializer, InvoiceListSerializer, QuoteListSerializer, PartSerializer, invoicePartSerializer, FileInformationSerializer, UserImagesSerializer
+from .models import User, InvoiceList, QuoteList, Part, invoicePart, FileInformation, EmailInfo, UserImages
 from rest_framework.decorators import api_view
 from django.core.files.storage import FileSystemStorage
 from django.http import FileResponse
@@ -19,11 +19,16 @@ import smtplib
 import hashlib
 import json
 from . import TokenCheck
+from django.core.files.storage import default_storage
 
 CURR_DIR = os.getcwd()
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 def Users(request):
+    if request.method == "GET":
+        user = User.objects.all()
+        serialize = UserSerializer(user, many=True)
+        return Response(serialize.data)
     if request.method == "POST":
         userData = request.data
         try:
@@ -32,15 +37,7 @@ def Users(request):
                 usernameCheck = loginData.username
                 passwordCheck = loginData.password
                 if usernameCheck == userData['username'] and passwordCheck == userData['password']:
-                    hashData = {
-                    'firstName':loginData.firstName,
-                    'lastName':loginData.lastName,
-                    'username':loginData.username,
-                    'email':loginData.email,
-                    'password':loginData.password,
-                    }
-                    hashData = json.dumps(hashData).encode('utf-8')
-                    token = hashlib.sha256(hashData).hexdigest()
+                    token = TokenCheck.makeToken(loginData.username)
                     return Response({'message':'Success', 'TOKEN':token, 'username':loginData.username, 'firstName':loginData.firstName, 'lastName':loginData.lastName, 'email':loginData.email})
                 else:
                     return Response({'message':'Wrong'})
@@ -51,6 +48,10 @@ def Users(request):
                                     username=userData['username'],
                                     email=userData['email'],
                                     password=userData['password'])
+                author = User.objects.get(username=userData['username'])
+                UserImages.objects.create(
+                    author=author
+                )
                 hashData = {
                     'firstName':userData['firstName'],
                     'lastName':userData['lastName'],
@@ -63,6 +64,16 @@ def Users(request):
                 return Response({'TOKEN':token})
         except Exception as e:
             return Response({'message':e})
+
+@api_view(['GET','POST'])
+def imageHandling(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'GET' and check == True:
+        user = User.objects.get(username=username)
+        userID = user.id
+        authImages = UserImages.objects.filter(author=userID)
+        serializer = UserImagesSerializer(authImages, many=True)
+        return Response(serializer.data)
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
 def InvoiceLists(request, username, token):
@@ -304,7 +315,7 @@ def uploadFile(request, username, token):
         fs = FileSystemStorage()
         name = fs.save(uploaded_file.name, uploaded_file)
         url = fs.url(name)
-        addedData = FileInformation.objects.create (
+        FileInformation.objects.create (
             author=author,
             fileName=uploaded_file.name,
             fileData=url
@@ -597,3 +608,68 @@ def emailPDF(request, username, token):
                 date=request.data['timeToSend']
             )
             return Response({'Status':'OK'})
+
+@api_view(['PUT'])
+def updateUser(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'PUT' and check == True:
+        userData = request.data
+        user = User.objects.get(username=username)
+        oldName = f'{user.firstName} {user.lastName}'
+        updateSalesPeople = QuoteList.objects.filter(salesperson=oldName)
+        newName = f'{userData["firstName"]} {userData["lastName"]}'
+        for updateSalesPerson in updateSalesPeople:
+            updateSalesPerson.salesperson = newName
+            updateSalesPerson.save()
+        user.firstName = userData['firstName']
+        user.lastName = userData['lastName']
+        user.username = userData['username']
+        user.email = userData['email']
+        user.save()
+        tokenSend = TokenCheck.makeToken(userData['username'])
+        updatedInfo = User.objects.filter(username=userData['username'])
+        serializer = UserSerializer(updatedInfo, many = True)
+        return Response({'data':serializer.data,'TOKEN':tokenSend})
+
+@api_view(['PUT'])
+def updatePassword(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'PUT' and check == True:
+        user = User.objects.get(username=username)
+
+        passwordData = request.data
+        oldPassword = passwordData['oldPassword']
+        newPassword = passwordData['newPassword']
+        confirmPass = passwordData['confirmNewPassword']
+
+        if user.password == oldPassword:
+            if newPassword == confirmPass:
+                user.password = newPassword
+                user.save()
+                token = TokenCheck.makeToken(user.username)
+                return Response({'TOKEN':token})
+        else:
+            return Response({'Status':'Wrong'})
+
+
+@api_view(['PUT'])
+def updatePictures(request, username, token):
+    check = TokenCheck.checkToken(username, token)
+    if request.method == 'PUT' and check == True:
+        author = User.objects.get(username=username)
+        if request.data['profilePicture_Bool'] == 'true':
+            uploaded_file = request.FILES['profilePicture']
+            fs = FileSystemStorage()
+            name = fs.save('faces/' + uploaded_file.name, uploaded_file)
+            updateUserPicture = UserImages.objects.get(author=author.id)
+            updateUserPicture.profilePicture = 'faces/' + uploaded_file.name
+            updateUserPicture.save()
+        if request.data['backgroundPicture_Bool'] == 'true':
+            uploaded_file2 = request.FILES['backgroundPicture']
+            fs2 = FileSystemStorage()
+            name2 = fs2.save('background/' + uploaded_file2.name, uploaded_file2)
+            updateUserPicture2 = UserImages.objects.get(author=author.id)
+            updateUserPicture2.backgroundPicture = 'background/' + uploaded_file2.name
+            updateUserPicture2.save()
+
+        return Response({"STATUS":'OK'})

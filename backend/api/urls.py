@@ -16,6 +16,10 @@ urlpatterns = [
     path('quotePDF/<username>/<token>', views.quotePDF),
     path('part-search/<username>/<token>', views.partSearch),
 
+    path('userImages/<username>/<token>', views.imageHandling),
     path('email/<username>/<token>', views.emailPDF),
 
+    path('updateUser/<username>/<token>', views.updateUser),
+    path('updatePassword/<username>/<token>', views.updatePassword),
+    path('updatePictures/<username>/<token>', views.updatePictures)
 ]

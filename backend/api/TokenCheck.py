@@ -2,7 +2,7 @@ from api.models import User
 import json
 import hashlib
 
-def checkToken(username, token):
+def getDataForToken(username):
     checkData = User.objects.get(username=username)
     hashData = {
         'firstName':checkData.firstName,
@@ -12,8 +12,16 @@ def checkToken(username, token):
         'password':checkData.password,
     }
     hashData = json.dumps(hashData).encode('utf-8')
-    tokenCheck = hashlib.sha256(hashData).hexdigest()
+    token = hashlib.sha256(hashData).hexdigest()
+    return token
+
+def checkToken(username, token):
+    tokenCheck = getDataForToken(username)
     if token == tokenCheck:
         return True
     else:
         return False
+
+def makeToken(username):
+    token = getDataForToken(username)
+    return token

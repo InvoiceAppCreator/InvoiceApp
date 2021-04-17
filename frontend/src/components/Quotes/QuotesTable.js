@@ -1,8 +1,6 @@
 import React, {Component} from 'react'
 import TableTemplate from './TableTemplate'
 import './Quotes.css'
-import image from '../Home/Images/SunBackground.jpg'
-import image2 from './Images/sampleFace2.png'
 import loader from './Images/loading2.gif'
 import axios from 'axios'
 import EditTable from './EditTable'
@@ -12,6 +10,8 @@ class QuotesTable extends Component {
   constructor(props) {
     super(props)
     this.state = {
+      profilePicture: '',
+      backgroundPicture: '',
       data: [],
       display: 'none',
       opacity: '1',
@@ -87,6 +87,13 @@ class QuotesTable extends Component {
     axios.get(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`)
     .then(res => {
       this.setState({data:res.data})
+    })
+    axios.get(`http://localhost:8000/api/userImages/${this.state.username}/${this.state.token}`)
+    .then(res => {
+      this.setState({
+        profilePicture:`http://localhost:8000${res.data[0].profilePicture}`,
+        backgroundPicture:`http://localhost:8000${res.data[0].backgroundPicture}`,
+      })
     })
   }
 
@@ -183,6 +190,7 @@ class QuotesTable extends Component {
     this.setState({
       partID : this.state.partID + 1
     })
+    console.log(this.state.imageData[0].profilePicture)
   }
 
   deleteSelected = () => {
@@ -432,12 +440,15 @@ class QuotesTable extends Component {
           x.status.toLowerCase().includes(event.target.value.toLowerCase())) {
             this.state.uniqueData.push(x)
           }
+          return 0
         })
       } else if (event.target.value === '') {
         this.setState  ({filterArray:false})
       }
-      this.state.filteredData = this.state.uniqueData
-      this.state.uniqueData = []
+      this.setState({
+        filteredData:this.state.uniqueData,
+        uniqueData: []
+      })
     })
   }
 
@@ -445,14 +456,14 @@ class QuotesTable extends Component {
     return (
       <>
         <div className='quotes-user' style={{'opacity':this.state.opacity}} style={{'opacity':this.state.display5_2}}>
-          <img src={image2} alt=''/>
+          <img src={this.state.profilePicture} alt=''/>
           <hr id='user-line'></hr>
           <p>{`${document.cookie.split('&')[2].split('=')[1]} ${document.cookie.split('&')[3].split('=')[1]}`}</p>
           <p>{`${document.cookie.split('&')[4].split('=')[1]}`}</p>
         </div>
         <div className='quotes-buttons' style={{'opacity':this.state.opacity}} style={{'opacity':this.state.display5_2}}>
           <div id='quotes-buttons-background-image'>
-            <img src={image} alt=''/>
+            <img src={this.state.backgroundPicture} alt=''/>
           </div>
           <div id='quotes-buttons-function-buttons' >
             <button id='quotes-button-functions-buttons-create' onClick={this.createQuote}>Create</button>
@@ -462,7 +473,7 @@ class QuotesTable extends Component {
         </div>
 
         <div id='search-field' style={{display:this.state.display5}}>
-          <input id='database_search' autofocus type='text' value={this.state.databaseSearch} onChange={this.search} placeholder='Database Search'/>
+          <input id='database_search' type='text' value={this.state.databaseSearch} onChange={this.search} placeholder='Database Search'/>
         </div>
 
         <div id='importing-page' style={{display:this.state.display2}}>
