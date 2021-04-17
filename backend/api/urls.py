@@ -5,21 +5,21 @@ from . import views
 urlpatterns = [
     path('users/', views.Users),
 
-    path('invoiceList/<username>/<token>', views.InvoiceLists),
-    path('part-invoice/<username>/<token>', views.invoiceParts),
-    path('uploadFileInvoice/<username>/<token>', views.uploadFileInvoice),
-    path('invoicePDF/<username>/<token>', views.invoicePDF),
+    path('invoiceList/<username>', views.InvoiceLists),
+    path('part-invoice/<username>', views.invoiceParts),
+    path('uploadFileInvoice/<username>', views.uploadFileInvoice),
+    path('invoicePDF/<username>', views.invoicePDF),
 
-    path('quoteList/<username>/<token>', views.QuoteLists),
-    path('parts/<username>/<token>', views.Parts),
-    path('uploadFile/<username>/<token>', views.uploadFile),
-    path('quotePDF/<username>/<token>', views.quotePDF),
-    path('part-search/<username>/<token>', views.partSearch),
+    path('quoteList/<username>', views.QuoteLists),
+    path('parts/<username>', views.Parts),
+    path('uploadFile/<username>', views.uploadFile),
+    path('quotePDF/<username>', views.quotePDF),
+    path('part-search/<username>', views.partSearch),
 
-    path('userImages/<username>/<token>', views.imageHandling),
-    path('email/<username>/<token>', views.emailPDF),
+    path('userImages/<username>', views.imageHandling),
+    path('email/<username>', views.emailPDF),
 
-    path('updateUser/<username>/<token>', views.updateUser),
-    path('updatePassword/<username>/<token>', views.updatePassword),
-    path('updatePictures/<username>/<token>', views.updatePictures)
+    path('updateUser/<username>', views.updateUser),
+    path('updatePassword/<username>', views.updatePassword),
+    path('updatePictures/<username>', views.updatePictures)
 ]

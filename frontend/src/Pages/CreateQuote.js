@@ -32,8 +32,17 @@ class CreateQuote extends Component {
       savedData: [],
 
       username: document.cookie.split('&')[0].split('=')[1],
-      token: document.cookie.split('&')[1].split('=')[1]
+      token: document.cookie.split('&')[1].split('=')[1],
+
+      serverDomain: 'http://localhost:8000',
+      clientDomain: 'http://localhost:3000',
+
+      headers : {headers: {Authorization:document.cookie.split('&')[1].split('=')[1]}}
     }
+  }
+
+  componentDidMount() {
+    document.title = 'Create Quote'
   }
 
   addPart = () => {
@@ -71,7 +80,8 @@ class CreateQuote extends Component {
           'partQtyOnHand' : this.state.qtyOnHand[i],
           'partQtyCommitted' : this.state.qtyComitted[i]
         }
-        axios.post(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`, info).then(res => {
+
+        axios.post(`${this.state.serverDomain}/api/parts/${this.state.username}`, info, this.state.headers).then(res => {
           console.log(res)
         })
       }
@@ -87,9 +97,9 @@ class CreateQuote extends Component {
       'company': this.state.company,
       'status': this.state.status
     }
-    axios.post(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`, quoteData).then(res => {
+    axios.post(`${this.state.serverDomain}/api/quoteList/${this.state.username}`, quoteData, this.state.headers).then(res => {
       console.log(res)
-      window.location.href = 'http://localhost:3000/quotes/'
+      window.location.href = `${this.state.clientDomain}/quotes/`
     })
   }
 

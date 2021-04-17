@@ -3,7 +3,7 @@ import Nav from '../components/Home/Nav'
 import Welcome from '../components/Home/Welcome'
 
 function Home() {
-
+    document.title = 'Home'
   return (
     <>
       <Nav/>

@@ -71,34 +71,54 @@ class QuotesTable extends Component {
       subject: '',
 
       username: document.cookie.split('&')[0].split('=')[1],
-      token: document.cookie.split('&')[1].split('=')[1]
+      token: document.cookie.split('&')[1].split('=')[1],
+
+      serverDomain: 'http://localhost:8000',
+      clientDomain: 'http://localhost:3000'
     }
   }
 
+  // LINK TO CREATE A QUOTE
   createQuote = (event) => {
-    window.location.href = 'http://localhost:3000/quotes/create-quote'
+    window.location.href = `${this.state.clientDomain}/quotes/create-quote`
   }
 
+  // LINK TO CONVERT A QUOTE TO INVOICE
   convertToInvoice = (event) => {
-    window.location.href = 'http://localhost:3000/quotes/convert-to-invoice'
+    window.location.href = `${this.state.clientDomain}/quotes/convert-to-invoice`
   }
 
+  // SETTING TITLE, GETTING QUOTES, GETTING PROFILE AND BACKGROUND
   componentDidMount() {
-    axios.get(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`)
-    .then(res => {
+    document.title = 'Quotes'
+
+    axios({
+      method: 'GET',
+      url: `${this.state.serverDomain}/api/quoteList/${this.state.username}`,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
       this.setState({data:res.data})
     })
-    axios.get(`http://localhost:8000/api/userImages/${this.state.username}/${this.state.token}`)
-    .then(res => {
+
+    axios({
+      method: 'GET',
+      url: `${this.state.serverDomain}/api/userImages/${this.state.username}`,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
       this.setState({
-        profilePicture:`http://localhost:8000${res.data[0].profilePicture}`,
-        backgroundPicture:`http://localhost:8000${res.data[0].backgroundPicture}`,
+        profilePicture:`${this.state.serverDomain}${res.data[0].profilePicture}`,
+        backgroundPicture:`${this.state.serverDomain}${res.data[0].backgroundPicture}`,
       })
     })
   }
 
   // -------------------- Pop Up Page START --------------------
 
+  // DATA FROM QUOTES' LIST AND THEIR PARTS TO BE DISPLAYED
   sendIDtoEditPage = (id) => {
     this.setState({
       display: 'block',
@@ -106,7 +126,13 @@ class QuotesTable extends Component {
       quoteID: id,
     })
 
-    axios.get(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`).then(res => {
+    axios({
+      method: 'GET',
+      url: `${this.state.serverDomain}/api/quoteList/${this.state.username}`,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
       for (var i = 0; i < res.data.length; i++) {
         if (res.data[i].id === id) {
           this.setState({
@@ -121,7 +147,13 @@ class QuotesTable extends Component {
           })
         }
       }
-      axios.get(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`).then(res => {
+      axios({
+        method: 'GET',
+        url: `${this.state.serverDomain}/api/parts/${this.state.username}`,
+        headers: {
+          Authorization: this.state.token
+        }
+      }).then(res => {
         res.data.filter((x) => {
           if (x.partQuoteNumber === this.state.quoteNumber) {
             this.state.databaseID.push(x.id)
@@ -190,7 +222,6 @@ class QuotesTable extends Component {
     this.setState({
       partID : this.state.partID + 1
     })
-    console.log(this.state.imageData[0].profilePicture)
   }
 
   deleteSelected = () => {
@@ -211,9 +242,16 @@ class QuotesTable extends Component {
     }
   }
 
+  // DELETION, ADDING, EDITING OF A QUOTE AND ITS PARTS
   saveQuote = () => {
-
-    axios.delete(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`, {'data': [this.state.deleteSave, 'notDelete']})
+    axios({
+      method: 'DELETE',
+      data: [this.state.deleteSave, 'notDelete'],
+      url: `${this.state.serverDomain}/api/parts/${this.state.username}`,
+      headers: {
+        Authorization: this.state.token
+      }
+    })
 
     for (var i = 0; i < this.state.partID; i++) {
       if (document.getElementById(`quote-tableParts-1-modelNumber${i}`) !== null &&
@@ -244,8 +282,13 @@ class QuotesTable extends Component {
               'partQtyCommitted': this.state.comittedSave[i]
             }
 
-            axios.put(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`, infoToBeUpdated).then(res => {
-
+            axios({
+              method: 'PUT',
+              url: `${this.state.serverDomain}/api/parts/${this.state.username}`,
+              data: infoToBeUpdated,
+              headers: {
+                Authorization: this.state.token
+              }
             })
 
       }
@@ -264,10 +307,17 @@ class QuotesTable extends Component {
       'status': this.state.status
     }
 
-
-    axios.put(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`, updatedHeaderInfo).then(res => {
-      window.location.href = 'http://localhost:3000/quotes'
+    axios({
+      method: 'PUT',
+      data: updatedHeaderInfo,
+      url: `${this.state.serverDomain}/api/quoteList/${this.state.username}`,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
+      window.location.href = `${this.state.clientDomain}/quotes`
     })
+
     this.setState({
       display: 'none',
       opacity: '1',
@@ -295,16 +345,32 @@ class QuotesTable extends Component {
     })
   }
 
+  // DELETING OF THE WHOLE QUOTE
   deleteQuote = (event) => {
-    axios.delete(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`, {'data':[this.state.quoteNumber]}).then(res => {
-      axios.delete(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`, {'data': [this.state.databaseID, 'allDelete']}).then(res => {
-        window.location.href = 'http://localhost:3000/quotes'
-      })
+    axios({
+      method: 'DELETE',
+      data: [this.state.quoteNumber],
+      url: `${this.state.serverDomain}/api/quoteList/${this.state.username}`,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
+        axios({
+          method: 'DELETE',
+          data: [this.state.databaseID, 'allDelete'],
+          url: `${this.state.serverDomain}/api/parts/${this.state.username}`,
+          headers: {
+            Authorization: this.state.token
+          }
+        }).then(res => {
+          window.location.href = `${this.state.clientDomain}/quotes`
+        })
     })
   }
 
   // -------------------- Pop Up Page END --------------------
 
+  // EXCEL IMPORTING OPTION
   importScreen = (event) => {
     this.setState({
       display2: 'block',
@@ -312,10 +378,18 @@ class QuotesTable extends Component {
     })
   }
 
+  // SUBMITTING EXCEL FILE
   submitFile = (event) => {
     const formData = new FormData()
     formData.append('files', this.state.file)
-    axios.post(`http://localhost:8000/api/uploadFile/${this.state.username}/${this.state.token}`, formData).then(res => {
+    axios({
+      method:'POST',
+      url: `${this.state.serverDomain}/api/uploadFile/${this.state.username}`,
+      data: formData,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
       console.log(res)
       this.setState({
         display2: 'none',
@@ -325,17 +399,19 @@ class QuotesTable extends Component {
         display2: 'none',
         display4: 'block'
       })
-      window.location.href = 'http://localhost:3000/quotes'
+      window.location.href = `${this.state.clientDomain}/quotes`
     })
 
   }
 
+  // FILE UPLOAD
   handleUpload = (event) => {
     this.setState({
       file: event.target.files[0]
     })
   }
 
+  // DATA TO SEND TO MAKE INTO PDF
   exportToPDF = (event) => {
 
     var infoToBePDFed = {
@@ -360,11 +436,12 @@ class QuotesTable extends Component {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': this.state.token
       },
       body: JSON.stringify(infoToBePDFed)
     }
-    fetch(`http://localhost:8000/api/quotePDF/${this.state.username}/${this.state.token}`, options).then(
+    fetch(`${this.state.serverDomain}/api/quotePDF/${this.state.username}`, options).then(
       response => {
         response.blob().then(blob => {
           let url = window.URL.createObjectURL(blob)
@@ -375,7 +452,6 @@ class QuotesTable extends Component {
         })
       }
     )
-
   }
 
   emailQuote = (event) => {
@@ -386,6 +462,7 @@ class QuotesTable extends Component {
     })
   }
 
+  // EMAIL QUOTE TO RECIPIENTS
   sendEmail = (event) => {
     const formData = new FormData()
     formData.append('filePDF', this.state.pdfFile)
@@ -400,8 +477,16 @@ class QuotesTable extends Component {
       display4: 'block'
     })
 
-    axios.post(`http://localhost:8000/api/email/${this.state.username}/${this.state.token}`, formData).then(res => {
-      window.location.href = 'http://localhost:3000/quotes'
+    axios({
+      method: 'POST',
+      url: `${this.state.serverDomain}/api/email/${this.state.username}`,
+      data: formData,
+      headers: {
+        Authorization: this.state.token
+      }
+    })
+      .then(res => {
+      window.location.href = `${this.state.clientDomain}/quotes`
     })
   }
 
@@ -426,6 +511,7 @@ class QuotesTable extends Component {
     }
   }
 
+  // SEARCHING QUOTES FROM KEYWORDS
   search = (event) => {this.setState({databaseSearch: event.target.value}, () => {
       if (event.target.value !== '') {
         this.setState({filterArray:true})

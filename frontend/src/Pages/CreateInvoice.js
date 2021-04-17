@@ -25,8 +25,17 @@ class CreateInvoice extends Component {
       partData: [<CreateInvoiceTable partKey={0}/>],
 
       username: document.cookie.split('&')[0].split('=')[1],
-      token: document.cookie.split('&')[1].split('=')[1]
+      token: document.cookie.split('&')[1].split('=')[1],
+
+      serverDomain: 'http://localhost:8000',
+      clientDomain: 'http://localhost:3000',
+
+      headers : {headers: {Authorization:document.cookie.split('&')[1].split('=')[1]}}
     }
+  }
+
+  componentDidMount() {
+    document.title = 'Convert Invoice'
   }
 
   addPart = () => {
@@ -75,7 +84,7 @@ class CreateInvoice extends Component {
           'totalPrice' : this.state.totalPrice[i],
         }
 
-        axios.post(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`, info).then(res => {
+        axios.post(`${this.state.serverDomain}/api/part-invoice/${this.state.username}`, info, this.state.headers).then(res => {
           console.log(res)
         })
       }
@@ -90,9 +99,9 @@ class CreateInvoice extends Component {
       'totalDue': this.state.total,
       'status': this.state.status,
     }
-    axios.post(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`, invoiceData).then(res => {
+    axios.post(`${this.state.serverDomain}/api/invoiceList/${this.state.username}/${this.state.token}`, invoiceData, this.state.headers).then(res => {
       console.log(res)
-      window.location.href = 'http://localhost:3000/invoices/'
+      window.location.href = `${this.state.clientDomain}/invoices/`
     })
 }
 

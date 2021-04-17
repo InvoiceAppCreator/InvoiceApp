@@ -16,7 +16,7 @@
     float: left;
     width: 100%;
     height: 39.5em;
-    background-image: url('Images/SunBackground.jpg');
+    background-image: url('Images/default.png');
     background-size: cover;
     color: white
 }

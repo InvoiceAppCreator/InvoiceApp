@@ -38,7 +38,10 @@ class ConvertToInvoice extends Component {
       display1: 'none',
 
       username: document.cookie.split('&')[0].split('=')[1],
-      token: document.cookie.split('&')[1].split('=')[1]
+      token: document.cookie.split('&')[1].split('=')[1],
+
+      serverDomain: 'http://localhost:8000',
+      clientDomain: 'http://localhost:3000'
     }
   }
 
@@ -50,16 +53,31 @@ class ConvertToInvoice extends Component {
   }
 
   componentDidMount() {
-    axios.get(`http://localhost:8000/api/part-search/${this.state.username}/${this.state.token}`).then(res => {
+
+    document.title = 'Convert to Invoice'
+
+    axios({
+      method: 'GET',
+      url: `${this.state.serverDomain}/api/part-search/${this.state.username}`,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
       this.setState({
         searchData : res.data
       })
     })
-    axios.get(`http://localhost:8000/api/quoteList/${this.state.username}/${this.state.token}`)
-    .then(res => {
+
+    axios({
+      method: 'GET',
+      url: `${this.state.serverDomain}/api/quoteList/${this.state.username}`,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
       this.setState({data:res.data})
-      console.log(this.state.data)
     })
+
     document.addEventListener("click", this.hideSearch)
   }
 
@@ -77,7 +95,13 @@ class ConvertToInvoice extends Component {
       })
       if (x.quoteNumber.includes(quoteNumber)) {
         if (quoteNumber === x.quoteNumber) {
-          axios.get(`http://localhost:8000/api/parts/${this.state.username}/${this.state.token}`).then(res => {
+          axios({
+            method: 'GET',
+            url: `${this.state.serverDomain}/api/parts/${this.state.username}`,
+            headers: {
+              Authorization: this.state.token
+            }
+          }).then(res => {
             this.state.partData.pop()
             for (var i = 0; i < res.data.length; i++) {
               if (res.data[i].partQuoteNumber === x.quoteNumber) {
@@ -157,8 +181,13 @@ class ConvertToInvoice extends Component {
         'unitPrice': this.state.unitPrice[i],
         'totalPrice': this.state.totalPrice[i],
       }
-      axios.post(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`, invoicePartData).then(res => {
-        console.log(res)
+      axios({
+        method: 'POST',
+        url: `${this.state.serverDomain}/api/part-invoice/${this.state.username}`,
+        data: invoicePartData,
+        headers: {
+          Authorization: this.state.token
+        }
       })
     }
     var invoiceData = {
@@ -171,9 +200,15 @@ class ConvertToInvoice extends Component {
       'status': this.state.status,
     }
 
-    axios.post(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`, invoiceData).then(res => {
-      console.log(res)
-      window.location.href = 'http://localhost:3000/quotes/'
+    axios({
+      method: 'POST',
+      url: `${this.state.serverDomain}/api/invoiceList/${this.state.username}`,
+      data: invoiceData,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
+      window.location.href = `${this.state.clientDomain}/quotes/`
     })
   }
 

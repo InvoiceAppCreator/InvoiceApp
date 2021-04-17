@@ -58,27 +58,38 @@ class InvoiceTable extends Component {
       file: null,
 
       username: document.cookie.split('&')[0].split('=')[1],
-      token: document.cookie.split('&')[1].split('=')[1]
+      token: document.cookie.split('&')[1].split('=')[1],
+
+      serverDomain: 'http://localhost:8000',
+      clientDomain: 'http://localhost:3000',
+
+      headers : {headers: {Authorization:document.cookie.split('&')[1].split('=')[1]}}
 
     }
   }
 
   componentDidMount() {
-    axios.get(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`)
+    document.title = 'Invoices'
+    axios.get(`${this.state.serverDomain}/api/invoiceList/${this.state.username}`, this.state.headers)
     .then(res => {
       this.setState({data:res.data})
     })
-    axios.get(`http://localhost:8000/api/userImages/${this.state.username}/${this.state.token}`)
-    .then(res => {
+    axios({
+      method: 'GET',
+      url: `${this.state.serverDomain}/api/userImages/${this.state.username}`,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
       this.setState({
-        profilePicture:`http://localhost:8000${res.data[0].profilePicture}`,
-        backgroundPicture:`http://localhost:8000${res.data[0].backgroundPicture}`,
+        profilePicture:`${this.state.serverDomain}${res.data[0].profilePicture}`,
+        backgroundPicture:`${this.state.serverDomain}${res.data[0].backgroundPicture}`,
       })
     })
   }
 
   createInvoice = (event) => {
-    window.location.href = 'http://localhost:3000/invoices/create-invoice'
+    window.location.href = `${this.state.clientDomain}/invoices/create-invoice`
   }
 
   sendIDtoEditPage = (id) => {
@@ -87,7 +98,7 @@ class InvoiceTable extends Component {
       opacity: '0.3'
     })
 
-    axios.get(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`).then(res => {
+    axios.get(`${this.state.serverDomain}/api/invoiceList/${this.state.username}`, this.state.headers).then(res => {
       for (var i = 0; i < res.data.length; i++) {
         if (res.data[i].id === id) {
           this.setState({
@@ -100,7 +111,7 @@ class InvoiceTable extends Component {
           })
         }
       }
-      axios.get(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`).then(res => {
+      axios.get(`${this.state.serverDomain}/api/part-invoice/${this.state.username}`, this.state.headers).then(res => {
         res.data.filter((x) => {
           if (x.partInvoiceNumber === this.state.invoiceNumber) {
             this.state.databaseID.push(x.id)
@@ -183,7 +194,14 @@ class InvoiceTable extends Component {
   }
 
   saveInvoice = (event) => {
-    axios.delete(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`, {'data': [this.state.deleteSave, 'notDelete']})
+    axios({
+      method: 'DELETE',
+      url: `${this.state.serverDomain}/api/part-invoice/${this.state.username}`,
+      data: [this.state.deleteSave, 'notDelete'],
+      headers: {
+        Authorization: this.state.token
+      }
+    })
 
     for (var i = 0; i < this.state.partID; i++) {
       if (document.getElementById(`invoice-tableParts-1-itemCode${i}`) !== null &&
@@ -208,9 +226,7 @@ class InvoiceTable extends Component {
             'totalPrice':this.state.totalPriceSave[i],
           }
 
-          axios.put(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`, infoToBeUpdated).then(res => {
-            console.log(res)
-          })
+          axios.put(`${this.state.serverDomain}/api/part-invoice/${this.state.username}`, infoToBeUpdated, this.state.headers)
       }
     }
 
@@ -225,16 +241,30 @@ class InvoiceTable extends Component {
       'status':this.state.status
     }
 
-    axios.put(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`,  updatedHeaderInfo).then(res => {
-      window.location.href = 'http://localhost:3000/invoices'
+    axios.put(`${this.state.serverDomain}/api/invoiceList/${this.state.username}`,  updatedHeaderInfo, this.state.headers).then(res => {
+      window.location.href = `${this.state.clientDomain}/invoices`
     })
 
   }
 
   deleteInvoice = (event) => {
-    axios.delete(`http://localhost:8000/api/invoiceList/${this.state.username}/${this.state.token}`, {'data':[this.state.invoiceNumber]}).then(res => {
-      axios.delete(`http://localhost:8000/api/part-invoice/${this.state.username}/${this.state.token}`, {'data': [this.state.databaseID, 'allDelete']}).then(res => {
-        window.location.href = 'http://localhost:3000/invoices'
+    axios({
+      method: 'DELETE',
+      url: `${this.state.serverDomain}/api/invoiceList/${this.state.username}`,
+      data: [this.state.invoiceNumber],
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
+      axios({
+        method: 'DELETE',
+        url: `${this.state.serverDomain}/api/part-invoice/${this.state.username}`,
+        data: [this.state.databaseID, 'allDelete'],
+        headers: {
+          Authorization: this.state.token
+        }
+      }).then(res => {
+        window.location.href = `${this.state.clientDomain}/invoices`
       })
     })
   }
@@ -249,13 +279,13 @@ class InvoiceTable extends Component {
   submitFile = (event) => {
     const formData = new FormData()
     formData.append('files', this.state.file)
-    axios.post(`http://localhost:8000/api/uploadFileInvoice/${this.state.username}/${this.state.token}`, formData).then(res => {
+    axios.post(`${this.state.serverDomain}/api/uploadFileInvoice/${this.state.username}`, formData, this.state.headers).then(res => {
       console.log(res)
       this.setState({
         display2: 'none',
         opacity: '1',
       })
-      window.location.href = 'http://localhost:3000/invoices'
+      window.location.href = `${this.state.clientDomain}/invoices`
     })
 
   }
@@ -286,11 +316,12 @@ class InvoiceTable extends Component {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': this.state.token,
       },
       body: JSON.stringify(infoToBePDFed)
     }
-    fetch(`http://localhost:8000/api/invoicePDF/${this.state.username}/${this.state.token}`, options).then(
+    fetch(`${this.state.serverDomain}/api/invoicePDF/${this.state.username}`, options).then(
       response => {
         response.blob().then(blob => {
           let url = window.URL.createObjectURL(blob)
@@ -325,8 +356,8 @@ class InvoiceTable extends Component {
       display4: 'block'
     })
 
-    axios.post(`http://localhost:8000/api/email/${this.state.username}/${this.state.token}`, formData).then(res => {
-      window.location.href = 'http://localhost:3000/invoices'
+    axios.post(`${this.state.serverDomain}/api/email/${this.state.username}`, formData, this.state.headers).then(res => {
+      window.location.href = `${this.state.clientDomain}/invoices`
     })
   }
 

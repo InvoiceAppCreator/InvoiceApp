@@ -92,7 +92,7 @@
   color: white;
 }
 
-#save-button {
+#save-button, #delete-button {
   width: 100%;
   padding: 1.5%;
   font-size: 1.1em;
@@ -103,6 +103,10 @@
 
 #save-button:hover {
   background-color: #94ad2e;
+}
+
+#delete-button {
+  background-color: red
 }
 
 .pics input {

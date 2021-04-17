@@ -23,20 +23,31 @@ class Settings extends Component {
       backgroundPictureUpdate: null,
 
       usernameCookie: document.cookie.split('&')[0].split('=')[1],
-      token: document.cookie.split('&')[1].split('=')[1]
+      token: document.cookie.split('&')[1].split('=')[1],
+
+      serverDomain: 'http://localhost:8000',
+      clientDomain: 'http://localhost:3000'
     }
   }
 
+  // GETTING PROFILE AND BACKGROUND IMAGES
   componentDidMount() {
-    axios.get(`http://localhost:8000/api/userImages/${this.state.usernameCookie}/${this.state.token}`)
-    .then(res => {
+    document.title = 'Settings'
+    axios({
+      method: 'GET',
+      url: `${this.state.serverDomain}/api/userImages/${this.state.usernameCookie}`,
+      headers: {
+        Authorization: this.state.token
+      }
+    }).then(res => {
       this.setState({
-        profilePicture:`http://localhost:8000${res.data[0].profilePicture}`,
-        backgroundPicture:`http://localhost:8000${res.data[0].backgroundPicture}`,
+        profilePicture:`${this.state.serverDomain}${res.data[0].profilePicture}`,
+        backgroundPicture:`${this.state.serverDomain}${res.data[0].backgroundPicture}`,
       })
     })
   }
 
+  // SEND DATA TO BE UPDATED
   updateAccount = (event) => {
 
     // ALL USER INFORMATION
@@ -92,38 +103,75 @@ class Settings extends Component {
       } else {
         formData.append('backgroundPicture', this.state.backgroundPictureUpdate)
         formData.append('backgroundPicture_Bool', true)
-
       }
     } else {
       pictures_bool = false
     }
 
-    // SENDING DATA AND UPDATING
+    // USER UPDATING
     if (user_info_bool) {
-      axios.put(`http://localhost:8000/api/updateUser/${this.state.usernameCookie}/${this.state.token}`, user_info).then(res => {
+      axios({
+        method:'PUT',
+        url: `${this.state.serverDomain}/api/updateUser/${this.state.usernameCookie}`,
+        data: user_info,
+        headers: {
+          Authorization: this.state.token
+        }
+      }).then(res => {
         var resD = res.data['data']
         var tokenR = res.data['TOKEN']
         document.cookie=`username=${resD[0].username}&token=${tokenR}&firstName=${resD[0].firstName}&lastName=${resD[0].lastName}&email=${resD[0].email}`
-        window.location.href = 'http://localhost:3000/settings'
+        window.location.href = `${this.state.clientDomain}/settings`
       })
     }
 
+    // PASSWORD UPDATING
     if (password_change_bool) {
-      axios.put(`http://localhost:8000/api/updatePassword/${this.state.usernameCookie}/${this.state.token}`, passwordChange).then(res => {
-        console.log(res.data['Status'])
+      axios({
+        method: 'PUT',
+        url: `${this.state.serverDomain}/api/updatePassword/${this.state.usernameCookie}`,
+        data: passwordChange,
+        headers: {
+          Authorization: this.state.token
+        }
+      }).then(res => {
         if (res.data['Status'] == 'Wrong') {
           alert("You Entered Incorrect Password")
         } else {
           var tokenR = res.data['TOKEN']
           document.cookie=`username=${this.state.username}&token=${tokenR}&firstName=${this.state.firstName}&lastName=${this.state.lastName}&email=${this.state.email}`
-          window.location.href = 'http://localhost:3000/settings'
+          window.location.href = `${this.state.clientDomain}/settings`
         }
       })
     }
 
+    // IMAGE UPDATING
     if (pictures_bool) {
-      axios.put(`http://localhost:8000/api/updatePictures/${this.state.usernameCookie}/${this.state.token}`, formData).then(res => {
-        window.location.href = 'http://localhost:3000/settings'
+      axios({
+        method: 'PUT',
+        url: `${this.state.serverDomain}/api/updatePictures/${this.state.usernameCookie}`,
+        data: formData,
+        headers: {
+          Authorization: this.state.token
+        }
+      }).then(res => {
+        window.location.href = `${this.state.clientDomain}/settings`
+      })
+    }
+  }
+
+  // DELETE ACCOUNT
+  deleteAccount = (event) => {
+    if(window.confirm('Are you Sure?')) {
+      axios({
+        method: 'DELETE',
+        url: `${this.state.serverDomain}/api/updateUser/${this.state.usernameCookie}`,
+        headers: {
+          Authorization: this.state.token
+        }
+      }).then(res => {
+          document.cookie=`username=&token=&firstName=&lastName=&email=`
+          window.location.href = `${this.state.clientDomain}/login`
       })
     }
   }
@@ -183,6 +231,7 @@ class Settings extends Component {
             <hr></hr>
 
             <button id='save-button' onClick={this.updateAccount}>Save Section</button>
+            <button id='delete-button' onClick={this.deleteAccount}>Delete Account</button>
 
         </div>
 

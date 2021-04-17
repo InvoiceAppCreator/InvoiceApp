@@ -81,3 +81,5 @@ class UserImages(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     profilePicture = models.ImageField(upload_to ='faces/', default='faces/default.png')
     backgroundPicture = models.ImageField(upload_to='background/', default='background/default.png')
+    def __str__(self):
+        return self.author.username

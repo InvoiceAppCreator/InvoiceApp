@@ -63,11 +63,11 @@ def Users(request):
                 token = hashlib.sha256(hashData).hexdigest()
                 return Response({'TOKEN':token})
         except Exception as e:
-            return Response({'message':e})
+            return Response({'message':'Wrong'})
 
-@api_view(['GET','POST'])
-def imageHandling(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+@api_view(['GET'])
+def imageHandling(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'GET' and check == True:
         user = User.objects.get(username=username)
         userID = user.id
@@ -76,8 +76,8 @@ def imageHandling(request, username, token):
         return Response(serializer.data)
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
-def InvoiceLists(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def InvoiceLists(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'GET' and check == True:
         user = User.objects.get(username=username)
         userID = user.id
@@ -119,8 +119,8 @@ def InvoiceLists(request, username, token):
         return Response({'Status':'OK'})
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def QuoteLists(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def QuoteLists(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'GET' and check == True:
         user = User.objects.get(username=username)
         userID = user.id
@@ -166,8 +166,8 @@ def QuoteLists(request, username, token):
         return Response({'Status':'OK'})
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def Parts(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def Parts(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'GET' and check == True:
         data = request.data
         user = User.objects.get(username=username)
@@ -234,8 +234,8 @@ def Parts(request, username, token):
             return Response({'Status':'OK'})
 
 @api_view(['GET'])
-def partSearch(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def partSearch(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'GET' and check == True:
         user = User.objects.get(username=username)
         userID = user.id
@@ -244,8 +244,8 @@ def partSearch(request, username, token):
         return Response(serializer.data)
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
-def invoiceParts(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def invoiceParts(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'GET' and check == True:
         data = request.data
         user = User.objects.get(username=username)
@@ -306,8 +306,8 @@ def invoiceParts(request, username, token):
             return Response({'Status':'OK'})
 
 @api_view(['POST'])
-def uploadFile(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def uploadFile(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'POST' and check == True:
         data = request.data
         author = User.objects.get(username=username)
@@ -362,8 +362,8 @@ def uploadFile(request, username, token):
         return Response({'Status':'OK'})
 
 @api_view(['POST'])
-def uploadFileInvoice(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def uploadFileInvoice(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'POST' and check == True:
         data = request.data
         author = User.objects.get(username=username)
@@ -410,8 +410,8 @@ def uploadFileInvoice(request, username, token):
         return Response({'Status':'OK'})
 
 @api_view(['POST'])
-def quotePDF(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def quotePDF(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'POST' and check == True:
         info = request.data
         quoteNumber = info['quoteNumber']
@@ -494,8 +494,8 @@ def quotePDF(request, username, token):
         return FileResponse(open(fileName, 'rb'))
 
 @api_view(['POST'])
-def invoicePDF(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def invoicePDF(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'POST' and check == True:
         info = request.data
         invoiceNumber = info['invoiceNumber']
@@ -562,8 +562,8 @@ def invoicePDF(request, username, token):
         return FileResponse(open(fileName, 'rb'))
 
 @api_view(['POST'])
-def emailPDF(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def emailPDF(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'POST' and check == True:
         data = request.data
         author = User.objects.get(username=username)
@@ -609,9 +609,9 @@ def emailPDF(request, username, token):
             )
             return Response({'Status':'OK'})
 
-@api_view(['PUT'])
-def updateUser(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+@api_view(['PUT', 'DELETE'])
+def updateUser(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'PUT' and check == True:
         userData = request.data
         user = User.objects.get(username=username)
@@ -630,18 +630,19 @@ def updateUser(request, username, token):
         updatedInfo = User.objects.filter(username=userData['username'])
         serializer = UserSerializer(updatedInfo, many = True)
         return Response({'data':serializer.data,'TOKEN':tokenSend})
+    elif request.method == 'DELETE' and check == True:
+        User.objects.get(username=username).delete()
+        return Response({'STATUS':'OK'})
 
 @api_view(['PUT'])
-def updatePassword(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def updatePassword(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'PUT' and check == True:
         user = User.objects.get(username=username)
-
         passwordData = request.data
         oldPassword = passwordData['oldPassword']
         newPassword = passwordData['newPassword']
         confirmPass = passwordData['confirmNewPassword']
-
         if user.password == oldPassword:
             if newPassword == confirmPass:
                 user.password = newPassword
@@ -653,8 +654,8 @@ def updatePassword(request, username, token):
 
 
 @api_view(['PUT'])
-def updatePictures(request, username, token):
-    check = TokenCheck.checkToken(username, token)
+def updatePictures(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
     if request.method == 'PUT' and check == True:
         author = User.objects.get(username=username)
         if request.data['profilePicture_Bool'] == 'true':
