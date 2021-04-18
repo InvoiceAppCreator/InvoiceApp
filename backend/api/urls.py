@@ -21,5 +21,7 @@ urlpatterns = [
 
     path('updateUser/<username>', views.updateUser),
     path('updatePassword/<username>', views.updatePassword),
-    path('updatePictures/<username>', views.updatePictures)
+    path('updatePictures/<username>', views.updatePictures),
+
+    path('deleteToken/<username>', views.deleteToken)
 ]

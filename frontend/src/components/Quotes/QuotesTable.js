@@ -671,7 +671,7 @@ class QuotesTable extends Component {
           <div id='quote-information'>
             <label style={{'margin-left':'30px'}}>Quote Number</label><input value={this.state.quoteNumber} onChange={e => {this.setState({quoteNumber:e.target.value})}} placeholder='Quote Number' type='text' style={{'margin-left':'18px'}}/>
             <label style={{'margin-left':'20px'}}>Customer</label><input type='text' value={this.state.customer} onChange={e => {this.setState({customer:e.target.value})}} placeholder='Customer' style={{'margin-left':'25px'}}/>
-            <label style={{'margin-left':'20px'}}>Total</label><input type='text' disabled value={this.state.total} onChange={e => {this.setState({total:e.target.value})}} placeholder='Total' style={{'margin-left':'20px'}}/><br></br>
+            <label style={{'margin-left':'20px'}}>Total</label><input type='text' disabled value={parseFloat(this.state.total).toFixed(2)} onChange={e => {this.setState({total:e.target.value})}} placeholder='Total' style={{'margin-left':'20px'}}/><br></br>
             <label style={{'margin-left':'30px'}}>Created Date</label><input type='text' value={this.state.createdDate} disabled placeholder='dd/mm//yyyy'  style={{'margin-left':'32px'}}/>
             <label style={{'margin-left':'20px'}}>Salesperson</label><input type='text' value={this.state.salesperson} onChange={e => {this.setState({salesperson:e.target.value})}} placeholder='Salesperson' style={{'margin-left':'7px'}}/>
             <label style={{'margin-left':'20px'}} >Status</label>

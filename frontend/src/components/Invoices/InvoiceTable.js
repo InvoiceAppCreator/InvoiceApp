@@ -34,7 +34,7 @@ class InvoiceTable extends Component {
       customer: '',
       createdDate: '',
       dueDate: '',
-      totalDue: 0,
+      totalDue: 0.00,
       status: '',
 
       databaseID: [],
@@ -133,7 +133,7 @@ class InvoiceTable extends Component {
             customer: res.data[i].customer,
             createdDate: res.data.[i].createdDate,
             dueDate: res.data.[i].dueDate,
-            totalDue: res.data[i].totalDue,
+            totalDue: parseFloat(res.data[i].totalDue).toFixed(2),
             status: res.data[i].status,
           })
         }
@@ -146,14 +146,14 @@ class InvoiceTable extends Component {
             this.state.description.push(x.description)
             this.state.quantity.push(x.quantity)
             this.state.unitPrice.push(x.unitPrice)
-            this.state.totalPrice.push(x.totalPrice)
+            this.state.totalPrice.push(parseFloat(x.totalPrice).toFixed(2))
 
             this.state.partData.push(<EditTable partKey={this.state.partID}
                                       itemCode={this.state.itemCode[this.state.partID]}
                                       description={this.state.description[this.state.partID]}
                                       quantity={this.state.quantity[this.state.partID]}
                                       unitPrice={this.state.unitPrice[this.state.partID]}
-                                      totalPrice={this.state.totalPrice[this.state.partID]}/>)
+                                      totalPrice={parseFloat(this.state.totalPrice[this.state.partID]).toFixed(2)}/>)
 
             this.setState({
               partID: this.state.partID + 1
@@ -244,7 +244,7 @@ class InvoiceTable extends Component {
           this.state.descriptionSave.push(document.getElementById(`invoice-tableParts-1-descriptionr${i}`).innerHTML)
           this.state.quantitySave.push(document.getElementById(`invoice-tableParts-1-quantity${i}`).innerHTML)
           this.state.unitPriceSave.push(document.getElementById(`invoice-tableParts-1-unitPrice${i}`).innerHTML)
-          this.state.totalPriceSave.push(document.getElementById(`invoice-tableParts-1-totalPrice${i}`).innerHTML)
+          this.state.totalPriceSave.push(parseFloat(document.getElementById(`invoice-tableParts-1-totalPrice${i}`).innerHTML)).toFixed(2)
 
           var infoToBeUpdated = {
             'invoiceNumberOriginal':this.state.databaseID[i],
@@ -254,7 +254,7 @@ class InvoiceTable extends Component {
             'description':this.state.descriptionSave[i],
             'quantity':this.state.quantitySave[i],
             'unitPrice':this.state.unitPriceSave[i],
-            'totalPrice':this.state.totalPriceSave[i],
+            'totalPrice':parseFloat(this.state.totalPriceSave[i]).toFixed(2),
           }
 
           axios.put(`${this.state.serverDomain}/api/part-invoice/${this.state.username}`, infoToBeUpdated, this.state.headers)
@@ -268,7 +268,7 @@ class InvoiceTable extends Component {
       'invoiceNumber':this.state.invoiceNumber,
       'createdDate':this.state.createdDate,
       'dueDate':this.state.dueDate,
-      'totalDue':this.state.totalDue,
+      'totalDue':parseFloat(this.state.totalDue).toFixed(2),
       'status':this.state.status
     }
 
@@ -335,13 +335,13 @@ class InvoiceTable extends Component {
       'customer': this.state.customer,
       'createdDate': this.state.createdDate,
       'dueDate': this.state.dueDate,
-      'totalDue': this.state.totalDue,
+      'totalDue': parseFloat(this.state.totalDue).toFixed(2),
 
       'itemCode': this.state.itemCode,
       'description': this.state.description,
       'quantity': this.state.quantity,
       'unitPrice': this.state.unitPrice,
-      'totalPrice': this.state.totalPrice,
+      'totalPrice': parseFloat(this.state.totalPrice).toFixed(2),
     }
     var options = {
       method: 'POST',
@@ -477,14 +477,14 @@ class InvoiceTable extends Component {
                                                           customer={info.customer}
                                                           createdDate={info.createdDate}
                                                           dueDate={info.dueDate}
-                                                          totalDue={info.totalDue}
+                                                          totalDue={parseFloat(info.totalDue).toFixed(2)}
                                                           status={info.status}
                                                           myFunction={this.sendIDtoEditPage}
                                                           id={info.id}/>) : this.state.data.map(info => <TableTemplate invoiceNumber={info.invoiceNumber}
                                                                                                     customer={info.customer}
                                                                                                     createdDate={info.createdDate}
                                                                                                     dueDate={info.dueDate}
-                                                                                                    totalDue={info.totalDue}
+                                                                                                    totalDue={parseFloat(info.totalDue).toFixed(2)}
                                                                                                     status={info.status}
                                                                                                     myFunction={this.sendIDtoEditPage}
                                                                                                     id={info.id}/>)
@@ -535,7 +535,7 @@ class InvoiceTable extends Component {
           <div id='quote-information'>
             <label style={{'margin-left':'15px'}}>Invoice Number</label><input value={this.state.invoiceNumber} onChange={e => {this.setState({invoiceNumber:e.target.value})}} placeholder='Quote Number' type='text' style={{'margin-left':'18px'}}/>
             <label style={{'margin-left':'20px'}}>Customer</label><input type='text' value={this.state.customer} onChange={e => {this.setState({customer:e.target.value})}} placeholder='Customer' style={{'margin-left':'19px'}}/>
-            <label style={{'margin-left':'20px'}}>Total</label><input type='text' value={this.state.totalDue} onChange={e => {this.setState({totalDue:e.target.value})}} placeholder='Total' style={{'margin-left':'20px'}}/><br></br>
+            <label style={{'margin-left':'20px'}}>Total</label><input type='text' value={parseFloat(this.state.totalDue).toFixed(2)} onChange={e => {this.setState({totalDue:e.target.value})}} placeholder='Total' style={{'margin-left':'20px'}}/><br></br>
             <label style={{'margin-left':'15px'}}>Created Date</label><input type='text' disabled value={this.state.createdDate} placeholder='dd/mm//yyyy'  style={{'margin-left':'44px'}}/>
             <label style={{'margin-left':'20px'}}>Due Date</label><input value={this.state.dueDate} onChange={e => {this.setState({dueDate:e.target.value})}} placeholder='dd/mm//yyyy' type='text' style={{'margin-left':'20px'}}/>
             <label style={{'margin-left':'20px'}}>Status</label>

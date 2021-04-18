@@ -1,27 +1,63 @@
-from api.models import User
+from api.models import User, TokenMake
+from random import randbytes
 import json
 import hashlib
+import time
 
-def getDataForToken(username):
-    checkData = User.objects.get(username=username)
+def createNewToken(username):
+    author = User.objects.get(username=username)
+    randonBytes = randbytes(15)
+    issueDate = int(time.time())
+    expiryDate = issueDate + 300 # 5 minutes
+    salt = hashlib.sha256(randonBytes).hexdigest()[0:15]
     hashData = {
-        'firstName':checkData.firstName,
-        'lastName':checkData.lastName,
-        'username':checkData.username,
-        'email':checkData.email,
-        'password':checkData.password,
+        'firstName':author.firstName,
+        'lastName':author.lastName,
+        'username':author.username,
+        'email':author.email,
+        'password':author.password,
+        'issueDate':issueDate,
+        'expiryDate':expiryDate,
     }
-    hashData = json.dumps(hashData).encode('utf-8')
-    token = hashlib.sha256(hashData).hexdigest()
+    hashDataDumped = json.dumps(hashData).encode('utf-8')
+    tokenPart = hashlib.sha256(hashDataDumped).hexdigest()
+    token = salt + tokenPart
+    TokenMake.objects.create(
+        author=author,
+        createdDate=issueDate,
+        expiryDate=expiryDate,
+        salt=salt,
+        token=token
+    )
     return token
+
+def getDataForToken(username, specificToken):
+    author = User.objects.get(username=username)
+    tokenData = TokenMake.objects.filter(author=author.id)
+
+    for tokens in tokenData:
+        if tokens.token == specificToken:
+            if tokens.expiryDate < int(time.time()):
+                return False
+            else:
+                hashData = {
+                    'firstName':author.firstName,
+                    'lastName':author.lastName,
+                    'username':author.username,
+                    'email':author.email,
+                    'password':author.password,
+                    'issueDate':tokens.createdDate,
+                    'expiryDate':tokens.expiryDate,
+                }
+                hashDataDumped = json.dumps(hashData).encode('utf-8')
+                tokenPart = hashlib.sha256(hashDataDumped).hexdigest()
+                token = tokens.salt + tokenPart
+                return token
+
 
 def checkToken(username, token):
-    tokenCheck = getDataForToken(username)
-    if token == tokenCheck:
-        return True
-    else:
+    tokenCheck = getDataForToken(username, token)
+    if tokenCheck == False:
         return False
-
-def makeToken(username):
-    token = getDataForToken(username)
-    return token
+    elif token == tokenCheck:
+        return True

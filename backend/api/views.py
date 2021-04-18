@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from .serializers import UserSerializer, InvoiceListSerializer, QuoteListSerializer, PartSerializer, invoicePartSerializer, FileInformationSerializer, UserImagesSerializer
-from .models import User, InvoiceList, QuoteList, Part, invoicePart, FileInformation, EmailInfo, UserImages
+from .models import User, InvoiceList, QuoteList, Part, invoicePart, FileInformation, EmailInfo, UserImages, TokenMake
 from rest_framework.decorators import api_view
 from django.core.files.storage import FileSystemStorage
 from django.http import FileResponse
@@ -37,7 +37,7 @@ def Users(request):
                 usernameCheck = loginData.username
                 passwordCheck = loginData.password
                 if usernameCheck == userData['username'] and passwordCheck == userData['password']:
-                    token = TokenCheck.makeToken(loginData.username)
+                    token = TokenCheck.createNewToken(loginData.username)
                     return Response({'message':'Success', 'TOKEN':token, 'username':loginData.username, 'firstName':loginData.firstName, 'lastName':loginData.lastName, 'email':loginData.email})
                 else:
                     return Response({'message':'Wrong'})
@@ -52,18 +52,10 @@ def Users(request):
                 UserImages.objects.create(
                     author=author
                 )
-                hashData = {
-                    'firstName':userData['firstName'],
-                    'lastName':userData['lastName'],
-                    'username':userData['username'],
-                    'email':userData['email'],
-                    'password':userData['password'],
-                }
-                hashData = json.dumps(hashData).encode('utf-8')
-                token = hashlib.sha256(hashData).hexdigest()
+                token = TokenCheck.createNewToken(userData['username'])
                 return Response({'TOKEN':token})
         except Exception as e:
-            return Response({'message':'Wrong'})
+            return Response({'message':e})
 
 @api_view(['GET'])
 def imageHandling(request, username):
@@ -626,7 +618,7 @@ def updateUser(request, username):
         user.username = userData['username']
         user.email = userData['email']
         user.save()
-        tokenSend = TokenCheck.makeToken(userData['username'])
+        tokenSend = TokenCheck.createToken(userData['username'])
         updatedInfo = User.objects.filter(username=userData['username'])
         serializer = UserSerializer(updatedInfo, many = True)
         return Response({'data':serializer.data,'TOKEN':tokenSend})
@@ -647,7 +639,7 @@ def updatePassword(request, username):
             if newPassword == confirmPass:
                 user.password = newPassword
                 user.save()
-                token = TokenCheck.makeToken(user.username)
+                token = TokenCheck.createToken(user.username)
                 return Response({'TOKEN':token})
         else:
             return Response({'Status':'Wrong'})
@@ -674,3 +666,14 @@ def updatePictures(request, username):
             updateUserPicture2.save()
 
         return Response({"STATUS":'OK'})
+
+@api_view(['DELETE'])
+def deleteToken(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
+    if request.method == 'DELETE' and check == True:
+        author = User.objects.get(username=username)
+        tokenData = TokenMake.objects.filter(author=author.id)
+        for tokens in tokenData:
+            if tokens.token == request.META['HTTP_AUTHORIZATION']:
+                tokens.delete()
+                return Response({'STATUS':'OK'})

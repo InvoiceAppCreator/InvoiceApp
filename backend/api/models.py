@@ -83,3 +83,12 @@ class UserImages(models.Model):
     backgroundPicture = models.ImageField(upload_to='background/', default='background/default.png')
     def __str__(self):
         return self.author.username
+
+class TokenMake(models.Model):
+    author = author = models.ForeignKey(User, on_delete=models.CASCADE)
+    createdDate = models.IntegerField()
+    expiryDate = models.IntegerField()
+    salt = models.CharField(max_length=500, default='')
+    token = models.CharField(max_length=1000, default='')
+    def __str__(self):
+        return self.token
