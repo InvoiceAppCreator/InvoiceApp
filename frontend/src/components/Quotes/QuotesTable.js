@@ -91,6 +91,7 @@ class QuotesTable extends Component {
   // SETTING TITLE, GETTING QUOTES, GETTING PROFILE AND BACKGROUND
   componentDidMount() {
     document.title = 'Quotes'
+    document.addEventListener('keyup', this.getTotal)
 
     axios({
       method: 'GET',
@@ -113,6 +114,29 @@ class QuotesTable extends Component {
         profilePicture:`${this.state.serverDomain}${res.data[0].profilePicture}`,
         backgroundPicture:`${this.state.serverDomain}${res.data[0].backgroundPicture}`,
       })
+    })
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keyup', this.getTotal)
+  }
+
+  getTotal = (event) => {
+    this.state.totalArray = [0]
+    for (var i = 0; i < this.state.partID; i++) {
+      var price = document.getElementById(`quote-tableParts-1-price${i}`)
+      var qtyComitted = document.getElementById(`quote-tableParts-1-comitted${i}`)
+
+      if (price !== null && qtyComitted !== null && price.innerHTML !== '' && qtyComitted.innerHTML !== '' && !isNaN(price.innerHTML) && !isNaN(qtyComitted.innerHTML)) {
+        let totalValuePerRow = price.innerHTML * qtyComitted.innerHTML
+        this.state.totalArray.push(totalValuePerRow)
+      }
+    }
+    let allRowsTotal = this.state.totalArray.reduce((total, num) => {
+      return total + num
+    })
+    this.setState({
+      total: parseFloat(allRowsTotal).toFixed(2)
     })
   }
 
@@ -231,6 +255,10 @@ class QuotesTable extends Component {
           document.getElementById(`quote-tableParts-1-delete${i}`).checked = false;
           var arr = this.state.partData
           arr[i] = ''
+          var totalValueForDelete = parseFloat(document.getElementById(`quote-tableParts-1-price${i}`).innerHTML).toFixed(2) * parseFloat(document.getElementById(`quote-tableParts-1-comitted${i}`).innerHTML).toFixed(2)
+          this.setState({
+            total: parseFloat(this.state.total).toFixed(2) - parseFloat(totalValueForDelete).toFixed(2)
+          })
           if (document.getElementById(`quote-tableParts-1-modelNumber${i}`) !== null && document.getElementById(`quote-tableParts-1-modelNumber${i}`).innerHTML !== '') {
             this.state.deleteSave.push(document.getElementById(`quote-tableParts-1-modelNumber${i}`).innerHTML)
           }
@@ -643,7 +671,7 @@ class QuotesTable extends Component {
           <div id='quote-information'>
             <label style={{'margin-left':'30px'}}>Quote Number</label><input value={this.state.quoteNumber} onChange={e => {this.setState({quoteNumber:e.target.value})}} placeholder='Quote Number' type='text' style={{'margin-left':'18px'}}/>
             <label style={{'margin-left':'20px'}}>Customer</label><input type='text' value={this.state.customer} onChange={e => {this.setState({customer:e.target.value})}} placeholder='Customer' style={{'margin-left':'25px'}}/>
-            <label style={{'margin-left':'20px'}}>Total</label><input type='text' value={this.state.total} onChange={e => {this.setState({total:e.target.value})}} placeholder='Total' style={{'margin-left':'20px'}}/><br></br>
+            <label style={{'margin-left':'20px'}}>Total</label><input type='text' disabled value={this.state.total} onChange={e => {this.setState({total:e.target.value})}} placeholder='Total' style={{'margin-left':'20px'}}/><br></br>
             <label style={{'margin-left':'30px'}}>Created Date</label><input type='text' value={this.state.createdDate} disabled placeholder='dd/mm//yyyy'  style={{'margin-left':'32px'}}/>
             <label style={{'margin-left':'20px'}}>Salesperson</label><input type='text' value={this.state.salesperson} onChange={e => {this.setState({salesperson:e.target.value})}} placeholder='Salesperson' style={{'margin-left':'7px'}}/>
             <label style={{'margin-left':'20px'}} >Status</label>

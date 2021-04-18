@@ -9,7 +9,7 @@ class CreateInvoice extends Component {
     this.state = {
       invoiceNumber: `I-${Math.floor((Math.random() * 20000000) + 1)}`,
       customer: '',
-      total: '',
+      total: 0,
       createdDate: `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
       dueDate: '',
       status: 'Pending',
@@ -20,6 +20,8 @@ class CreateInvoice extends Component {
       unitPrice: [],
       totalPrice: [],
       delete: [],
+
+      totalArray: [0],
 
       partID: 1,
       partData: [<CreateInvoiceTable partKey={0}/>],
@@ -36,6 +38,31 @@ class CreateInvoice extends Component {
 
   componentDidMount() {
     document.title = 'Convert Invoice'
+    document.addEventListener('keyup', this.getTotal)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keyup', this.getTotal)
+  }
+
+  getTotal = (event) => {
+    this.state.totalArray = [0]
+    for (var i = 0; i < this.state.partID; i++) {
+      var price = document.getElementById(`invoice-convert-unitPrice${i}`)
+      var qtyComitted = document.getElementById(`invoice-convert-quantity${i}`)
+
+      if (price !== null && qtyComitted !== null && price.innerHTML !== '' && qtyComitted.innerHTML !== '' && !isNaN(price.innerHTML) && !isNaN(qtyComitted.innerHTML)) {
+        let totalValuePerRow = price.innerHTML * qtyComitted.innerHTML
+        this.state.totalArray.push(totalValuePerRow)
+        document.getElementById(`invoice-convert-totalPrice${i}`).innerHTML = parseFloat(totalValuePerRow).toFixed(2)
+      }
+    }
+    let allRowsTotal = this.state.totalArray.reduce((total, num) => {
+      return total + num
+    })
+    this.setState({
+      total:parseFloat(allRowsTotal).toFixed(2)
+    })
   }
 
   addPart = () => {
@@ -52,6 +79,10 @@ class CreateInvoice extends Component {
           document.getElementById(`invoice-create-delete${i}`).checked = false;
           var arr = this.state.partData
           arr[i] = ''
+          var totalValueForDelete = parseFloat(document.getElementById(`invoice-convert-unitPrice${i}`).innerHTML).toFixed(2) * parseFloat(document.getElementById(`invoice-convert-quantity${i}`).innerHTML).toFixed(2)
+          this.setState({
+            total: parseFloat(this.state.total).toFixed(2) - parseFloat(totalValueForDelete).toFixed(2)
+          })
           this.setState({partData: arr})
           console.log("Deleting..." + i)
         } else {
@@ -99,7 +130,7 @@ class CreateInvoice extends Component {
       'totalDue': this.state.total,
       'status': this.state.status,
     }
-    axios.post(`${this.state.serverDomain}/api/invoiceList/${this.state.username}/${this.state.token}`, invoiceData, this.state.headers).then(res => {
+    axios.post(`${this.state.serverDomain}/api/invoiceList/${this.state.username}`, invoiceData, this.state.headers).then(res => {
       console.log(res)
       window.location.href = `${this.state.clientDomain}/invoices/`
     })

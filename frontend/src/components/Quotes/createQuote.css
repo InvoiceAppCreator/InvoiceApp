@@ -25,15 +25,13 @@
   height: 21em;
   margin-left: 2%;
   margin-top: 2%;
-  background-color: blue;
   border: 2px solid black;
 
 }
 
 .adding-part-data-headers {
   width: 100%;
-  height: 3em;
-  background-color: red;
+  background-color: #30a309;
 }
 
 .adding-part-data-headers table {
@@ -98,6 +96,7 @@
 }
 
 #save-add-delete button {
+  margin-top: 1%;
   padding: 0.5%;
   width: 33.3%;
   background-color: #30a309;

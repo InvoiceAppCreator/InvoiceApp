@@ -34,7 +34,7 @@ class InvoiceTable extends Component {
       customer: '',
       createdDate: '',
       dueDate: '',
-      totalDue: '',
+      totalDue: 0,
       status: '',
 
       databaseID: [],
@@ -51,6 +51,8 @@ class InvoiceTable extends Component {
       unitPriceSave: [],
       totalPriceSave: [],
       deleteSave: [],
+
+      totalArray: [0],
 
       partID: 0,
       partData: [],
@@ -70,6 +72,7 @@ class InvoiceTable extends Component {
 
   componentDidMount() {
     document.title = 'Invoices'
+    document.addEventListener('keyup', this.getTotal)
     axios.get(`${this.state.serverDomain}/api/invoiceList/${this.state.username}`, this.state.headers)
     .then(res => {
       this.setState({data:res.data})
@@ -85,6 +88,30 @@ class InvoiceTable extends Component {
         profilePicture:`${this.state.serverDomain}${res.data[0].profilePicture}`,
         backgroundPicture:`${this.state.serverDomain}${res.data[0].backgroundPicture}`,
       })
+    })
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keyup', this.getTotal)
+  }
+
+  getTotal = (event) => {
+    this.state.totalArray = [0]
+    for (var i = 0; i < this.state.partID; i++) {
+      var price = document.getElementById(`invoice-tableParts-1-unitPrice${i}`)
+      var qtyComitted = document.getElementById(`invoice-tableParts-1-quantity${i}`)
+
+      if (price !== null && qtyComitted !== null && price.innerHTML !== '' && qtyComitted.innerHTML !== '' && !isNaN(price.innerHTML) && !isNaN(qtyComitted.innerHTML)) {
+        let totalValuePerRow = price.innerHTML * qtyComitted.innerHTML
+        this.state.totalArray.push(totalValuePerRow)
+        document.getElementById(`invoice-tableParts-1-totalPrice${i}`).innerHTML = parseFloat(totalValuePerRow).toFixed(2)
+      }
+    }
+    let allRowsTotal = this.state.totalArray.reduce((total, num) => {
+      return total + num
+    })
+    this.setState({
+      totalDue: parseFloat(allRowsTotal).toFixed(2)
     })
   }
 
@@ -182,6 +209,10 @@ class InvoiceTable extends Component {
           document.getElementById(`invoice-tableParts-1-delete${i}`).checked = false;
           var arr = this.state.partData
           arr[i] = ''
+          var totalValueForDelete = parseFloat(document.getElementById(`invoice-tableParts-1-unitPrice${i}`).innerHTML).toFixed(2) * parseFloat(document.getElementById(`invoice-tableParts-1-quantity${i}`).innerHTML).toFixed(2)
+          this.setState({
+            totalDue: parseFloat(this.state.totalDue).toFixed(2) - parseFloat(totalValueForDelete).toFixed(2)
+          })
           if (document.getElementById(`invoice-tableParts-1-itemCode${i}`) !== null && document.getElementById(`invoice-tableParts-1-itemCode${i}`).innerHTML !== '') {
             this.state.deleteSave.push(document.getElementById(`invoice-tableParts-1-itemCode${i}`).innerHTML)
           }

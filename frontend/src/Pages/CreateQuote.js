@@ -10,7 +10,7 @@ class CreateQuote extends Component {
     this.state = {
       quoteNumber: `Q-${Math.floor((Math.random() * 20000000) + 1)}`,
       customers: '',
-      total: '',
+      total: 0.00,
       createdDate: `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
       salesperson: `${document.cookie.split('&')[2].split('=')[1]} ${document.cookie.split('&')[3].split('=')[1]}`,
       expectedDate: '',
@@ -25,6 +25,8 @@ class CreateQuote extends Component {
       qtyOnHand: [],
       qtyComitted: [],
       delete: [],
+
+      totalArray: [0],
 
       partID : 1,
       partData : [<CreateQuoteTable partKey={0}/>],
@@ -43,6 +45,30 @@ class CreateQuote extends Component {
 
   componentDidMount() {
     document.title = 'Create Quote'
+    document.addEventListener('keyup', this.getTotal)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keyup', this.getTotal)
+  }
+
+  getTotal = (event) => {
+    this.state.totalArray = [0]
+    for (var i = 0; i < this.state.partID; i++) {
+      var price = document.getElementById(`price${i}`)
+      var qtyComitted = document.getElementById(`qtyComitted${i}`)
+
+      if (price !== null && qtyComitted !== null && price.innerHTML !== '' && qtyComitted.innerHTML !== '' && !isNaN(price.innerHTML) && !isNaN(qtyComitted.innerHTML)) {
+        let totalValuePerRow = price.innerHTML * qtyComitted.innerHTML
+        this.state.totalArray.push(totalValuePerRow)
+      }
+    }
+    let allRowsTotal = this.state.totalArray.reduce((total, num) => {
+      return total + num
+    })
+    this.setState({
+      total:allRowsTotal
+    })
   }
 
   addPart = () => {
@@ -90,7 +116,7 @@ class CreateQuote extends Component {
       'author': document.cookie.split('&')[0].split('=')[1],
       'quoteNumber': this.state.quoteNumber,
       'customers': this.state.customers,
-      'total': this.state.total,
+      'total': parseFloat(this.state.total).toFixed(2),
       'createdDate': this.state.createdDate,
       'salesperson': this.state.salesperson,
       'expectedDate': this.state.expectedDate,
@@ -111,6 +137,10 @@ class CreateQuote extends Component {
           document.getElementById(`delete${i}`).checked = false;
           var arr = this.state.partData
           arr[i] = ''
+          var totalValueForDelete = parseFloat(document.getElementById(`price${i}`).innerHTML).toFixed(2) * parseFloat(document.getElementById(`qtyComitted${i}`).innerHTML).toFixed(2)
+          this.setState({
+            total: parseFloat(this.state.total).toFixed(2) - parseFloat(totalValueForDelete).toFixed(2)
+          })
           this.setState({partData: arr})
           console.log("Deleting..." + i)
         } else {
@@ -133,7 +163,7 @@ class CreateQuote extends Component {
       <div className='main-information-fill'>
         <label>Quote Number</label><input style={{'margin-left':'20px'}} type='text' disabled value={this.state.quoteNumber} placeholder='Quote Number' onChange={e => {this.setState({quoteNumber:e.target.value})}}/>
         <label style={{'margin-left':'34px'}}>Customers</label><input style={{'margin-left':'34px'}} type='text' value={this.state.customers} placeholder='Customers' onChange={e => {this.setState({customers:e.target.value})}}/>
-        <label style={{'margin-left':'34px'}}>Total</label><input type='text' style={{'margin-left':'34px'}} value={this.state.total} placeholder='Total Value' onChange={e => {this.setState({total:e.target.value})}}/><br></br>
+        <label style={{'margin-left':'34px'}}>Total</label><input type='text' style={{'margin-left':'34px'}} value={this.state.total.toFixed(2)} disabled placeholder='Total Value'/><br></br>
         <label>Created Date</label><input type='text' style={{'margin-left':'34px'}} value={this.state.createdDate} placeholder='Today' onChange={e => {this.setState({createdDate:e.target.value})}} disabled/>
         <label style={{'margin-left':'34px'}}>Salesperson</label><input type='text' style={{'margin-left':'24px'}} value={this.state.salesperson} placeholder='Salesperson Name' onChange={e => {this.setState({salesperson:e.target.value})}}/>
         <label style={{'margin-left':'34px'}}>Status</label>
@@ -141,7 +171,7 @@ class CreateQuote extends Component {
             <option value={'Order'}>Order</option>
             <option value={'Done'}>Done</option>
           </select><br></br>
-        <label>Expected Date</label><input type='text' style={{'margin-left':'20px'}} value={this.state.expectedDate} placeholder='Expected Date' onChange={e => {this.setState({expectedDate:e.target.value})}}/>
+        <label>Expected Date</label><input type='text' style={{'margin-left':'20px'}} value={this.state.expectedDate} placeholder='dd/mm/yyyy' onChange={e => {this.setState({expectedDate:e.target.value})}}/>
         <label style={{'margin-left':'34px'}}>Company</label><input type='text' style={{'margin-left':'44px'}} value={this.state.company} placeholder='Company' onChange={e => {this.setState({company:e.target.value})}}/>
 
       </div>
@@ -149,29 +179,33 @@ class CreateQuote extends Component {
       <div className='adding-part-data'>
         <div className = 'adding-part-data-headers'>
           <table>
-            <th className='modelNumber'>Model Number</th>
-            <th className='partNumber'>Part Number</th>
-            <th className='description'>Description</th>
-            <th className='cost'>Cost</th>
-            <th className='price'>Price</th>
-            <th className='qtyOnHand'>On Hand</th>
-            <th className='qtyComitted'>Comitted</th>
-            <th className='delete' style={{'text-align':'center'}}>Delete</th>
+            <thead>
+              <th className='modelNumber'>Model Number</th>
+              <th className='partNumber'>Part Number</th>
+              <th className='description'>Description</th>
+              <th className='cost'>Cost</th>
+              <th className='price'>Price</th>
+              <th className='qtyOnHand'>On Hand</th>
+              <th className='qtyComitted'>Comitted</th>
+              <th className='delete' style={{'text-align':'center'}}>Delete</th>
+            </thead>
           </table>
         </div>
 
         <div className = 'adding-part-data-table'>
           <table contenteditable id='adding-part-data-table-actualTable'>
-            {
-              this.state.partData.map(x => {
-                try {
-                  return x
-                } catch (e){
+            <tbody>
+              {
+                this.state.partData.map(x => {
+                  try {
+                    return x
+                  } catch (e){
 
-                }
-                return 0
-              })
-            }
+                  }
+                  return 0
+                })
+              }
+            </tbody>
           </table>
         </div>
 
