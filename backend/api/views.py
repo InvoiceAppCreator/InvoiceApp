@@ -23,6 +23,14 @@ from django.core.files.storage import default_storage
 
 CURR_DIR = os.getcwd()
 
+@api_view(['POST'])
+def checkTokenActive(request, username):
+    check = TokenCheck.checkToken(username, request.META['HTTP_AUTHORIZATION'])
+    if request.method == 'POST' and check == True:
+        return Response({'Status':'TokenTrue'})
+    else:
+        return Response({'Status':'TokenFalse'})
+
 @api_view(['POST', 'GET'])
 def Users(request):
     if request.method == "GET":
@@ -618,7 +626,7 @@ def updateUser(request, username):
         user.username = userData['username']
         user.email = userData['email']
         user.save()
-        tokenSend = TokenCheck.createToken(userData['username'])
+        tokenSend = TokenCheck.createNewToken(userData['username'])
         updatedInfo = User.objects.filter(username=userData['username'])
         serializer = UserSerializer(updatedInfo, many = True)
         return Response({'data':serializer.data,'TOKEN':tokenSend})
@@ -639,7 +647,7 @@ def updatePassword(request, username):
             if newPassword == confirmPass:
                 user.password = newPassword
                 user.save()
-                token = TokenCheck.createToken(user.username)
+                token = TokenCheck.createNewToken(user.username)
                 return Response({'TOKEN':token})
         else:
             return Response({'Status':'Wrong'})

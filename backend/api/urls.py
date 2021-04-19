@@ -23,5 +23,7 @@ urlpatterns = [
     path('updatePassword/<username>', views.updatePassword),
     path('updatePictures/<username>', views.updatePictures),
 
-    path('deleteToken/<username>', views.deleteToken)
+    path('deleteToken/<username>', views.deleteToken),
+
+    path('tokenCheckActive/<username>', views.checkTokenActive)
 ]

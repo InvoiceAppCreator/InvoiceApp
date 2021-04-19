@@ -8,7 +8,7 @@ def createNewToken(username):
     author = User.objects.get(username=username)
     randonBytes = randbytes(15)
     issueDate = int(time.time())
-    expiryDate = issueDate + 300 # 5 minutes
+    expiryDate = issueDate + 1800 # 40 minutes
     salt = hashlib.sha256(randonBytes).hexdigest()[0:15]
     hashData = {
         'firstName':author.firstName,
@@ -18,10 +18,10 @@ def createNewToken(username):
         'password':author.password,
         'issueDate':issueDate,
         'expiryDate':expiryDate,
+        'salt':salt
     }
     hashDataDumped = json.dumps(hashData).encode('utf-8')
-    tokenPart = hashlib.sha256(hashDataDumped).hexdigest()
-    token = salt + tokenPart
+    token = hashlib.sha256(hashDataDumped).hexdigest()
     TokenMake.objects.create(
         author=author,
         createdDate=issueDate,
@@ -48,10 +48,10 @@ def getDataForToken(username, specificToken):
                     'password':author.password,
                     'issueDate':tokens.createdDate,
                     'expiryDate':tokens.expiryDate,
+                    'salt':tokens.salt
                 }
                 hashDataDumped = json.dumps(hashData).encode('utf-8')
-                tokenPart = hashlib.sha256(hashDataDumped).hexdigest()
-                token = tokens.salt + tokenPart
+                token = hashlib.sha256(hashDataDumped).hexdigest()
                 return token
 
 

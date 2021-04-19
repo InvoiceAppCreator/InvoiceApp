@@ -10,11 +10,13 @@ import ConvertToInvoice from './Pages/ConvertToInvoice'
 import CreateInvoice from './Pages/CreateInvoice'
 import Settings from './Pages/Settings'
 import logout from './components/Logout/logout'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function App() {
 
   return (
     <div>
+      <ErrorBoundary>
       <Router>
         <Route path='/' exact component={Login}/>
         <Route path='/login' exact component={Login}/>
@@ -28,6 +30,7 @@ function App() {
         <Route path='/settings' exact component={Settings}/>
         <Route path='/logout' exact component={logout}/>
       </Router>
+      </ErrorBoundary>
     </div>
   );
 }
